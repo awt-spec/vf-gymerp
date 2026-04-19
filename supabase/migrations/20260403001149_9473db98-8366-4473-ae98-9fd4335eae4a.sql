@@ -1,0 +1,1 @@
+ALTER TABLE public.inventory ADD COLUMN image_url TEXT;

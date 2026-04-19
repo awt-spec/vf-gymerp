@@ -1,0 +1,1 @@
+ALTER TABLE public.gyms ADD COLUMN custom_domain text DEFAULT NULL;

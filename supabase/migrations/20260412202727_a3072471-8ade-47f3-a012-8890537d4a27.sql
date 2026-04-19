@@ -1,0 +1,1 @@
+ALTER TABLE public.inventory ADD COLUMN video_url TEXT DEFAULT NULL;

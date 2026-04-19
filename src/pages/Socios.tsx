@@ -1,0 +1,206 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "@/hooks/use-toast";
+import { Plus, Search, IdCard } from "lucide-react";
+import { MemberQRCode } from "@/components/MemberQRCode";
+import { useGym } from "@/hooks/useGym";
+import GymAiAssistant from "@/components/GymAiAssistant";
+
+type Member = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string | null;
+  phone: string | null;
+  cedula: string;
+  status: "active" | "inactive" | "suspended";
+  created_at: string;
+};
+
+export default function Socios() {
+  const [members, setMembers] = useState<Member[]>([]);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ first_name: "", last_name: "", email: "", phone: "", cedula: "" });
+  const [loading, setLoading] = useState(false);
+  const { gymId } = useGym();
+
+  const fetchMembers = async () => {
+    let query = supabase.from("members").select("*").order("created_at", { ascending: false });
+    if (gymId) query = query.eq("gym_id", gymId);
+    if (statusFilter !== "all") query = query.eq("status", statusFilter as any);
+    if (search) query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%,email.ilike.%${search}%,cedula.ilike.%${search}%`);
+    const { data } = await query;
+    setMembers((data as Member[]) ?? []);
+  };
+
+  useEffect(() => { fetchMembers(); }, [search, statusFilter]);
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.cedula.trim()) {
+      toast({ title: "Error", description: "La cédula es obligatoria", variant: "destructive" });
+      return;
+    }
+    if (!form.email.trim()) {
+      toast({ title: "Error", description: "El email es obligatorio", variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-member-auth", {
+        body: {
+          cedula: form.cedula,
+          email: form.email,
+          first_name: form.first_name,
+          last_name: form.last_name,
+          phone: form.phone,
+          gym_id: gymId,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({ title: "Socio creado ✅", description: `Contraseña inicial: ${form.cedula}` });
+      setOpen(false);
+      setForm({ first_name: "", last_name: "", email: "", phone: "", cedula: "" });
+      fetchMembers();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+    setLoading(false);
+  };
+
+  const statusBadge = (status: string) => {
+    const variants: Record<string, string> = {
+      active: "bg-primary/20 text-primary border-primary/30",
+      inactive: "bg-muted text-muted-foreground border-border",
+      suspended: "bg-destructive/20 text-destructive border-destructive/30",
+    };
+    const labels: Record<string, string> = { active: "Activo", inactive: "Inactivo", suspended: "Suspendido" };
+    return <Badge className={variants[status] ?? ""}>{labels[status] ?? status}</Badge>;
+  };
+
+  return (
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-display font-bold">Socios</h1>
+          <div className="flex items-center gap-3 mt-1 flex-wrap">
+            <p className="text-muted-foreground text-sm">Gestión de miembros del gimnasio</p>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">{members.length} total</span>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 font-medium">{members.filter(m => m.status === "active").length} activos</span>
+            {members.filter(m => m.status === "inactive").length > 0 && <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">{members.filter(m => m.status === "inactive").length} inactivos</span>}
+            {members.filter(m => m.status === "suspended").length > 0 && <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-medium">{members.filter(m => m.status === "suspended").length} suspendidos</span>}
+          </div>
+        </div>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button><Plus className="mr-2 h-4 w-4" />Nuevo Socio</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="font-display">Registrar Socio</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleCreate} className="space-y-4">
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1.5"><IdCard className="h-3.5 w-3.5" />Cédula *</Label>
+                <Input value={form.cedula} onChange={(e) => setForm({ ...form, cedula: e.target.value })} required placeholder="Número de cédula" />
+                <p className="text-[10px] text-muted-foreground">La cédula será el usuario y contraseña inicial del socio</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Nombre *</Label>
+                  <Input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Apellido *</Label>
+                  <Input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} required />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Email *</Label>
+                <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required placeholder="Para recuperar contraseña" />
+              </div>
+              <div className="space-y-2">
+                <Label>Teléfono</Label>
+                <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+              </div>
+              <Button type="submit" className="w-full" disabled={loading}>{loading ? "Creando cuenta..." : "Registrar Socio"}</Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Buscar por nombre, email o cédula..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
+        </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-40">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos</SelectItem>
+            <SelectItem value="active">Activos</SelectItem>
+            <SelectItem value="inactive">Inactivos</SelectItem>
+            <SelectItem value="suspended">Suspendidos</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <Card className="border-border/50 bg-card/80">
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nombre</TableHead>
+                <TableHead>Cédula</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Teléfono</TableHead>
+                <TableHead>Estado</TableHead>
+                <TableHead>QR</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {members.length === 0 ? (
+                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No hay socios registrados</TableCell></TableRow>
+              ) : (
+                members.map((m) => (
+                  <TableRow key={m.id}>
+                    <TableCell className="font-medium">{m.first_name} {m.last_name}</TableCell>
+                    <TableCell className="font-mono text-xs">{m.cedula || "—"}</TableCell>
+                    <TableCell>{m.email ?? "—"}</TableCell>
+                    <TableCell>{m.phone ?? "—"}</TableCell>
+                    <TableCell>{statusBadge(m.status)}</TableCell>
+                    <TableCell><MemberQRCode memberId={m.id} memberName={`${m.first_name} ${m.last_name}`} /></TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+      <GymAiAssistant
+        module="socios"
+        moduleLabel="Socios"
+        context={{
+          total: members.length,
+          active: members.filter(m => m.status === "active").length,
+          inactive: members.filter(m => m.status === "inactive").length,
+          suspended: members.filter(m => m.status === "suspended").length,
+          recent: members.slice(0, 10).map(m => ({ name: `${m.first_name} ${m.last_name}`, status: m.status, email: m.email })),
+        }}
+      />
+    </div>
+  );
+}

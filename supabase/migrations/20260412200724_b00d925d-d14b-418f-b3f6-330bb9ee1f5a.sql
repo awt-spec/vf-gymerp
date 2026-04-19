@@ -1,0 +1,1 @@
+ALTER TABLE public.promotions ADD COLUMN display_type TEXT NOT NULL DEFAULT 'banner';
