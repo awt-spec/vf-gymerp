@@ -81,18 +81,15 @@ export default function Login({ gymId, gymSlug, gymName, gymLogoUrl, gymColor }:
     }
     setLoading(true);
     try {
-      const { data: member, error: lookupError } = await supabase
-        .from("members")
-        .select("email")
-        .eq("cedula", trimmed)
-        .maybeSingle();
+      const { data: emailLookup, error: lookupError } = await supabase
+        .rpc("get_member_email_by_cedula", { _cedula: trimmed, _gym_id: gymId ?? null });
 
-      if (lookupError || !member?.email) {
+      if (lookupError || !emailLookup) {
         throw new Error("Credenciales incorrectas");
       }
 
       const { error } = await supabase.auth.signInWithPassword({
-        email: member.email,
+        email: emailLookup as string,
         password: cedulaPassword || trimmed,
       });
       if (error) throw new Error("Credenciales incorrectas");

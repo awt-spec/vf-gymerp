@@ -2029,6 +2029,10 @@ export type Database = {
       }
     }
     Functions: {
+      get_member_email_by_cedula: {
+        Args: { _cedula: string; _gym_id?: string }
+        Returns: string
+      }
       get_owned_gym_ids: { Args: { _user_id: string }; Returns: string[] }
       get_staff_gym_ids: { Args: { _user_id: string }; Returns: string[] }
       get_user_gym_id: { Args: { _user_id: string }; Returns: string }
