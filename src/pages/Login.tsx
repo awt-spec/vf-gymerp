@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { Sparkles, IdCard, Mail, Dumbbell, Shield } from "lucide-react";
+import { IdCard, Mail, Dumbbell } from "lucide-react";
 import elevateLogo from "@/assets/elevate-logo.png";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -18,16 +18,9 @@ type LoginProps = {
   gymColor?: string | null;
 };
 
-const DEMO_ACCOUNTS = [
-  { email: "admin@gym.com", password: "admin1234", role: "Admin" },
-  { email: "coach@gym.com", password: "coach1234", role: "Coach" },
-  { email: "recepcion@gym.com", password: "recep1234", role: "Recepcionista" },
-  { email: "usuario@gym.com", password: "user1234", role: "Socio" },
-];
-
 export default function Login({ gymId, gymSlug, gymName, gymLogoUrl, gymColor }: LoginProps = {}) {
-  const [email, setEmail] = useState(DEMO_ACCOUNTS[0].email);
-  const [password, setPassword] = useState(DEMO_ACCOUNTS[0].password);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [cedula, setCedula] = useState("");
   const [cedulaPassword, setCedulaPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -40,7 +33,6 @@ export default function Login({ gymId, gymSlug, gymName, gymLogoUrl, gymColor }:
       localStorage.setItem("current_gym_id", gymId);
       return;
     }
-
     localStorage.removeItem("current_gym_id");
   };
 
@@ -60,7 +52,6 @@ export default function Login({ gymId, gymSlug, gymName, gymLogoUrl, gymColor }:
         const { data: signInData, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         persistSelectedGym();
-        // If owner of a gym that hasn't completed setup, send to wizard
         if (signInData.user && gymId) {
           const { data: gymRow } = await supabase
             .from("gyms")
@@ -83,63 +74,32 @@ export default function Login({ gymId, gymSlug, gymName, gymLogoUrl, gymColor }:
 
   const handleCedulaLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    const trimmed = cedula.trim();
+    if (!trimmed) {
+      toast({ title: "Error", description: "Credenciales incorrectas", variant: "destructive" });
+      return;
+    }
     setLoading(true);
     try {
-      // Look up the member's email by cedula
       const { data: member, error: lookupError } = await supabase
         .from("members")
         .select("email")
-        .eq("cedula", cedula)
-        .single();
+        .eq("cedula", trimmed)
+        .maybeSingle();
 
       if (lookupError || !member?.email) {
-        throw new Error("No se encontró un socio con esa cédula");
+        throw new Error("Credenciales incorrectas");
       }
 
       const { error } = await supabase.auth.signInWithPassword({
         email: member.email,
-        password: cedulaPassword || cedula, // default password is cedula
+        password: cedulaPassword || trimmed,
       });
-      if (error) throw error;
+      if (error) throw new Error("Credenciales incorrectas");
       persistSelectedGym();
       navigate("/dashboard");
     } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDemoNewMember = async () => {
-    setLoading(true);
-    try {
-      const ts = Date.now();
-      const demoEmail = `demo.socio.${ts}@gym.com`;
-      const demoPw = "demo1234";
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: demoEmail,
-        password: demoPw,
-        options: { data: { full_name: "Socio Demo" } },
-      });
-      if (signUpError) throw signUpError;
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email: demoEmail, password: demoPw });
-      if (signInError) {
-        toast({ title: "Cuenta demo creada", description: "Confirmá tu email para iniciar sesión." });
-        setLoading(false);
-        return;
-      }
-      const userId = signUpData.user?.id;
-      if (userId) {
-        await supabase.from("user_roles").insert({ user_id: userId, role: "member" as any });
-        const { data: memberData } = await supabase.from("members").insert({
-          first_name: "Socio", last_name: "Demo", email: demoEmail,
-          auth_user_id: userId, status: "active",
-        }).select("id").single();
-        if (memberData) { navigate(`/onboarding?member=${memberData.id}`); return; }
-      }
-      navigate("/dashboard");
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: "Error", description: error.message || "Credenciales incorrectas", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -177,7 +137,7 @@ export default function Login({ gymId, gymSlug, gymName, gymLogoUrl, gymColor }:
               <form onSubmit={handleEmailLogin} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@gym.com" required />
+                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password">Contraseña</Label>
@@ -206,51 +166,6 @@ export default function Login({ gymId, gymSlug, gymName, gymLogoUrl, gymColor }:
               </form>
             </TabsContent>
           </Tabs>
-
-          {gymSlug === "elevate-lindora" && (
-            <Button
-              type="button"
-              className="w-full bg-foreground text-background hover:bg-foreground/90"
-              disabled={loading}
-              onClick={async () => {
-                setLoading(true);
-                try {
-                  const { error } = await supabase.auth.signInWithPassword({
-                    email: "admin@gym.com",
-                    password: "admin1234",
-                  });
-                  if (error) throw error;
-                  persistSelectedGym();
-                  navigate("/dashboard");
-                } catch (err: any) {
-                  toast({ title: "Error", description: err.message, variant: "destructive" });
-                } finally {
-                  setLoading(false);
-                }
-              }}
-            >
-              <Shield className="mr-2 h-4 w-4" />
-              Acceso Admin Elevate
-            </Button>
-          )}
-
-          <Button type="button" variant="outline" className="w-full" disabled={loading} onClick={handleDemoNewMember}>
-            <Sparkles className="mr-2 h-4 w-4" />
-            Probar como socio nuevo (Demo)
-          </Button>
-
-          <div className="rounded-md bg-muted/50 border border-border/50 p-3 space-y-2">
-            <p className="text-xs font-semibold text-center">Cuentas Demo:</p>
-            {DEMO_ACCOUNTS.map((acc) => (
-              <button key={acc.email} type="button"
-                onClick={() => { setEmail(acc.email); setPassword(acc.password); setLoginMode("email"); }}
-                className={`w-full text-left px-3 py-2 rounded-md text-xs transition-colors border ${
-                  email === acc.email && loginMode === "email" ? "border-foreground/30 bg-foreground/5 text-foreground" : "border-border/50 text-muted-foreground hover:bg-muted"
-                }`}>
-                <span className="font-semibold">{acc.role}:</span> {acc.email} / {acc.password}
-              </button>
-            ))}
-          </div>
 
           {loginMode === "email" && (
             <div className="text-center">

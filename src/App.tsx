@@ -58,7 +58,7 @@ const App = () => (
                 <Route
                   path="/erp-dashboard"
                   element={
-                    <ProtectedRoute>
+                    <ProtectedRoute requiredRoles={["super_admin"]}>
                       <ErpDashboard />
                     </ProtectedRoute>
                   }
