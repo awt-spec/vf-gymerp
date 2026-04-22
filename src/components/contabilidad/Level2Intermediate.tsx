@@ -27,12 +27,13 @@ interface Props {
   summary: AccountingSummary;
   monthExpenses: any[];
   monthPayments: any[];
+  monthShopSales?: any[];
   cashRegisters: any[];
   plans?: any[];
   refetch: () => void;
 }
 
-export function Level2Intermediate({ summary, monthExpenses, monthPayments, cashRegisters, refetch }: Props) {
+export function Level2Intermediate({ summary, monthExpenses, monthPayments, monthShopSales = [], cashRegisters, refetch }: Props) {
   const [arqueoOpen, setArqueoOpen] = useState(false);
   const [arqueo, setArqueo] = useState({ expected_amount: "", actual_amount: "", notes: "" });
 
@@ -187,16 +188,16 @@ export function Level2Intermediate({ summary, monthExpenses, monthPayments, cash
       <div className="space-y-2">
         <h2 className="text-sm font-display font-semibold text-muted-foreground">Movimientos del mes</h2>
         <div className="space-y-1.5 max-h-[250px] overflow-y-auto">
-          {[...monthPayments.filter(p => p.status === "paid").map(p => ({ ...p, _type: "income", _date: p.payment_date, _amount: Number(p.amount) })),
-            ...monthExpenses.map(e => ({ ...e, _type: "expense", _date: e.expense_date, _amount: Number(e.amount) }))
+          {[
+            ...monthPayments.filter(p => p.status === "paid").map(p => ({ ...p, _type: "income", _label: `${p.members?.first_name ?? ""} ${p.members?.last_name ?? ""}`.trim() || "Pago", _date: p.payment_date, _amount: Number(p.amount) })),
+            ...monthShopSales.map(s => ({ ...s, _type: "income", _label: `🛒 ${s.shop_products?.name || "Venta tienda"}`, _date: s.sale_date, _amount: Number(s.total_amount) })),
+            ...monthExpenses.map(e => ({ ...e, _type: "expense", _label: e.description, _date: e.expense_date, _amount: Number(e.amount) }))
           ].sort((a, b) => b._date.localeCompare(a._date)).map((item, i) => (
             <div key={i} className="flex items-center justify-between gap-2 p-2 rounded-lg bg-card border border-border/50">
               <div className="flex-1 min-w-0">
-                <p className="text-xs truncate">
-                  {item._type === "income" ? `${item.members?.first_name} ${item.members?.last_name}` : item.description}
-                </p>
+                <p className="text-xs truncate">{item._label}</p>
                 <span className="text-[10px] text-muted-foreground">
-                  {format(new Date(item._date), "dd MMM", { locale: es })} · {PAYMENT_METHODS[item.payment_method]}
+                  {format(new Date(item._date), "dd MMM", { locale: es })} · {PAYMENT_METHODS[item.payment_method] || item.payment_method}
                 </span>
               </div>
               <span className={`font-semibold text-sm ${item._type === "income" ? "text-primary" : "text-destructive"}`}>

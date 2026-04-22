@@ -23,6 +23,7 @@ export function useAccounting(selectedDate: Date = new Date()) {
   const { gymId } = useGym();
   const [expenses, setExpenses] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
+  const [shopSales, setShopSales] = useState<any[]>([]);
   const [cashRegisters, setCashRegisters] = useState<any[]>([]);
   const [budgets, setBudgets] = useState<any[]>([]);
   const [fixedAssets, setFixedAssets] = useState<any[]>([]);
@@ -51,7 +52,7 @@ export function useAccounting(selectedDate: Date = new Date()) {
       tenant(supabase.from("fixed_assets").select("*")).order("purchase_date", { ascending: false }),
       tenant(supabase.from("members").select("id, first_name, last_name, status")),
       tenant(supabase.from("payments").select("id, amount").eq("status", "pending")),
-      tenant(supabase.from("shop_sales").select("*")).order("sale_date", { ascending: false }),
+      tenant(supabase.from("shop_sales").select("*, shop_products(name, category)")).order("sale_date", { ascending: false }),
     ]);
 
     const allExpenses = expRes.data ?? [];
@@ -59,6 +60,7 @@ export function useAccounting(selectedDate: Date = new Date()) {
     const allShopSales = shopRes.data ?? [];
     setExpenses(allExpenses);
     setPayments(allPayments);
+    setShopSales(allShopSales);
     setCashRegisters(cashRes.data ?? []);
     setBudgets(budRes.data ?? []);
     setFixedAssets(assetRes.data ?? []);
@@ -122,10 +124,11 @@ export function useAccounting(selectedDate: Date = new Date()) {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   return {
-    expenses, payments, cashRegisters, budgets, fixedAssets, members,
+    expenses, payments, shopSales, cashRegisters, budgets, fixedAssets, members,
     summary, loading, refetch: fetchData,
     // Filtered for current month
     monthExpenses: expenses.filter(e => e.expense_date >= monthStart && e.expense_date <= monthEnd),
     monthPayments: payments.filter(p => p.payment_date >= monthStart && p.payment_date <= monthEnd),
+    monthShopSales: shopSales.filter(s => s.sale_date >= monthStart && s.sale_date <= monthEnd),
   };
 }
