@@ -93,7 +93,7 @@ export default function Socios() {
     <div className="space-y-4 md:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl md:text-3xl font-display font-bold">Socios</h1>
+          <h1 className="text-2xl md:text-3xl font-display font-bold">Usuarios</h1>
           <div className="flex items-center gap-3 mt-1 flex-wrap">
             <p className="text-muted-foreground text-sm">Gestión de miembros del gimnasio</p>
             <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">{members.length} total</span>
@@ -104,17 +104,17 @@ export default function Socios() {
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button><Plus className="mr-2 h-4 w-4" />Nuevo Socio</Button>
+            <Button><Plus className="mr-2 h-4 w-4" />Nuevo Usuario</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle className="font-display">Registrar Socio</DialogTitle>
+              <DialogTitle className="font-display">Registrar Usuario</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleCreate} className="space-y-4">
               <div className="space-y-2">
                 <Label className="flex items-center gap-1.5"><IdCard className="h-3.5 w-3.5" />Cédula *</Label>
                 <Input value={form.cedula} onChange={(e) => setForm({ ...form, cedula: e.target.value })} required placeholder="Número de cédula" />
-                <p className="text-[10px] text-muted-foreground">La cédula será el usuario y contraseña inicial del socio</p>
+                <p className="text-[10px] text-muted-foreground">La cédula será el usuario y contraseña inicial</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -134,7 +134,7 @@ export default function Socios() {
                 <Label>Teléfono</Label>
                 <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>{loading ? "Creando cuenta..." : "Registrar Socio"}</Button>
+              <Button type="submit" className="w-full" disabled={loading}>{loading ? "Creando cuenta..." : "Registrar Usuario"}</Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -143,7 +143,7 @@ export default function Socios() {
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Buscar por nombre, email o cédula..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
+          <Input placeholder="Buscar por nombre, email o cédula..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" aria-label="Buscar usuarios" />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-40">
@@ -173,7 +173,7 @@ export default function Socios() {
             </TableHeader>
             <TableBody>
               {members.length === 0 ? (
-                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No hay socios registrados</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No hay usuarios registrados</TableCell></TableRow>
               ) : (
                 members.map((m) => (
                   <TableRow key={m.id}>

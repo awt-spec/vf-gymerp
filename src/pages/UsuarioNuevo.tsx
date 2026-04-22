@@ -54,17 +54,17 @@ export default function UsuarioNuevo() {
         <div>
           <h1 className="text-xl md:text-2xl font-display font-bold flex items-center gap-2">
             <UserPlus className="h-5 w-5 text-primary" />
-            Nuevo Usuario
+            Nuevo Socio
           </h1>
           <p className="text-muted-foreground text-xs">
-            Creá un acceso para coach, recepcionista o admin
+            Creá un acceso para coach, recepcionista o admin del equipo
           </p>
         </div>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base font-display">Datos del usuario</CardTitle>
+          <CardTitle className="text-base font-display">Datos del socio</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -97,7 +97,7 @@ export default function UsuarioNuevo() {
                 Cancelar
               </Button>
               <Button type="submit" disabled={submitting} className="flex-1">
-                {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Crear Usuario"}
+                {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Crear Socio"}
               </Button>
             </div>
           </form>

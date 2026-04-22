@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 
 const sharedItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Socios", url: "/socios", icon: Users },
+  { title: "Usuarios", url: "/socios", icon: Users },
   { title: "Acceso", url: "/acceso", icon: ScanLine },
   { title: "Clases", url: "/clases", icon: CalendarDays },
 ];
