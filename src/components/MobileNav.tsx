@@ -96,11 +96,11 @@ export function FullNavItems() {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    const slug = localStorage.getItem("last_gym_slug");
     await supabase.auth.signOut();
     localStorage.removeItem("current_gym_id");
+    localStorage.removeItem("last_gym_slug");
     toast({ title: "Sesión cerrada" });
-    navigate(slug ? `/gym/${slug}/login` : "/");
+    navigate("/");
   };
 
   let allItems;
