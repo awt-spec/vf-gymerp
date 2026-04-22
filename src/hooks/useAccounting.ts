@@ -124,10 +124,11 @@ export function useAccounting(selectedDate: Date = new Date()) {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   return {
-    expenses, payments, cashRegisters, budgets, fixedAssets, members,
+    expenses, payments, shopSales, cashRegisters, budgets, fixedAssets, members,
     summary, loading, refetch: fetchData,
     // Filtered for current month
     monthExpenses: expenses.filter(e => e.expense_date >= monthStart && e.expense_date <= monthEnd),
     monthPayments: payments.filter(p => p.payment_date >= monthStart && p.payment_date <= monthEnd),
+    monthShopSales: shopSales.filter(s => s.sale_date >= monthStart && s.sale_date <= monthEnd),
   };
 }
