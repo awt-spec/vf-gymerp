@@ -64,11 +64,12 @@ export default function Inventario() {
   };
 
   const handleAddSelected = async () => {
+    if (!gymId) { toast({ title: "Selecciona un gimnasio", variant: "destructive" }); return; }
     const toAdd = Array.from(selectedMachines.entries())
       .filter(([name]) => !existingNames.has(name))
       .map(([name, data]) => {
         const preset = PRESET_MACHINES.find(p => p.name === name)!;
-        return { name: preset.name, category: preset.category, quantity: data.quantity, min_stock: 0, unit_cost: 0, image_url: preset.image, weight_kg: data.weight_kg ?? null };
+        return { name: preset.name, category: preset.category, quantity: data.quantity, min_stock: 0, unit_cost: 0, image_url: preset.image, weight_kg: data.weight_kg ?? null, gym_id: gymId };
       });
     if (toAdd.length === 0) { toast({ title: "No hay nuevos" }); return; }
     const { error } = await supabase.from("inventory").insert(toAdd);
