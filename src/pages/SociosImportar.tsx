@@ -84,7 +84,7 @@ export default function SociosImportar() {
 
           const memberId = (data as any)?.member?.id ?? (data as any)?.member_id;
           if (memberId && status !== "active") {
-            await supabase.from("members").update({ status }).eq("id", memberId);
+            await supabase.from("members").update({ status: status as "active" | "inactive" | "suspended" }).eq("id", memberId);
           }
           out.push({ row: i + 2, cedula, status: "ok" });
         } catch (err: any) {
