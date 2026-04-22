@@ -38,6 +38,10 @@ import SetupWizard from "./pages/SetupWizard";
 import Usuarios from "./pages/Usuarios";
 import UsuarioNuevo from "./pages/UsuarioNuevo";
 import UsuariosImportar from "./pages/UsuariosImportar";
+import SocioNuevo from "./pages/SocioNuevo";
+import SocioDetalle from "./pages/SocioDetalle";
+import SocioEditar from "./pages/SocioEditar";
+import SociosImportar from "./pages/SociosImportar";
 import CierresCaja from "./pages/CierresCaja";
 import ResetPassword from "./pages/ResetPassword";
 
@@ -84,6 +88,10 @@ const App = () => (
                 >
                   <Route path="/dashboard" element={<Index />} />
                   <Route path="/socios" element={<Socios />} />
+                  <Route path="/socios/nuevo" element={<SocioNuevo />} />
+                  <Route path="/socios/importar" element={<SociosImportar />} />
+                  <Route path="/socios/:id" element={<SocioDetalle />} />
+                  <Route path="/socios/:id/editar" element={<SocioEditar />} />
                   <Route path="/planes" element={<Planes />} />
                   <Route path="/planes/nuevo" element={<PlanEditor />} />
                   <Route path="/planes/:id/editar" element={<PlanEditor />} />
