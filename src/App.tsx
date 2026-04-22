@@ -15,6 +15,8 @@ import Planes from "./pages/Planes";
 import PlanEditor from "./pages/PlanEditor";
 import Acceso from "./pages/Acceso";
 import Clases from "./pages/Clases";
+import ClaseNueva from "./pages/ClaseNueva";
+import HorarioNuevo from "./pages/HorarioNuevo";
 import PlanesEjercicio from "./pages/PlanesEjercicio";
 import PlanesNutricion from "./pages/PlanesNutricion";
 import Inventario from "./pages/Inventario";
@@ -97,6 +99,10 @@ const App = () => (
                   <Route path="/planes/:id/editar" element={<PlanEditor />} />
                   <Route path="/acceso" element={<Acceso />} />
                   <Route path="/clases" element={<Clases />} />
+                  <Route path="/clases/nueva" element={<ClaseNueva />} />
+                  <Route path="/clases/:id/editar" element={<ClaseNueva />} />
+                  <Route path="/clases/horario/nuevo" element={<HorarioNuevo />} />
+                  <Route path="/clases/horario/:id/editar" element={<HorarioNuevo />} />
                   <Route path="/planes-ejercicio" element={<PlanesEjercicio />} />
                   <Route path="/planes-nutricion" element={<PlanesNutricion />} />
                   <Route path="/inventario" element={<Inventario />} />
