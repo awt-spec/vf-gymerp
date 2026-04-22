@@ -20,7 +20,7 @@ const sharedItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Usuarios", url: "/socios", icon: Users },
   { title: "Control de Acceso", url: "/acceso", icon: ScanLine },
-  { title: "Clases y Horarios", url: "/clases", icon: CalendarDays },
+  { title: "Clases", url: "/clases", icon: CalendarDays },
 ];
 
 const coachItems = [
