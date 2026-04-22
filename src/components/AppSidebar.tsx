@@ -102,13 +102,6 @@ export function AppSidebar() {
               showName={false}
             />
           </SidebarGroupLabel>
-          {!collapsed && !loading && (isAdmin || isCoach || isReceptionist || isMember) && (
-            <div className="px-3 mb-2">
-              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-foreground/70">
-                {isAdmin ? "Admin" : isCoach ? "Coach" : isReceptionist ? "Recepción" : "Socio"}
-              </span>
-            </div>
-          )}
           <GymSwitcher collapsed={collapsed} />
           <SidebarGroupContent>
             <SidebarMenu>
