@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/currency";
+import { useGym } from "@/hooks/useGym";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import {
