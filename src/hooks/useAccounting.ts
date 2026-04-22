@@ -23,6 +23,7 @@ export function useAccounting(selectedDate: Date = new Date()) {
   const { gymId } = useGym();
   const [expenses, setExpenses] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
+  const [shopSales, setShopSales] = useState<any[]>([]);
   const [cashRegisters, setCashRegisters] = useState<any[]>([]);
   const [budgets, setBudgets] = useState<any[]>([]);
   const [fixedAssets, setFixedAssets] = useState<any[]>([]);
