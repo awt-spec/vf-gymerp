@@ -26,9 +26,9 @@ export default function SocioNuevo() {
     date_of_birth: "",
     status: "active" as "active" | "inactive" | "suspended",
     notes: "",
-    plan_id: "none",
+    plan_id: "",
     payment_method: "cash",
-    register_payment: false,
+    register_payment: true,
   });
 
   useEffect(() => {
@@ -49,6 +49,10 @@ export default function SocioNuevo() {
     if (!gymId) return;
     if (!form.cedula.trim() || !form.email.trim()) {
       toast({ title: "Faltan datos", description: "Cédula y email son obligatorios", variant: "destructive" });
+      return;
+    }
+    if (!form.plan_id) {
+      toast({ title: "Membresía requerida", description: "Todo usuario debe tener una membresía asignada", variant: "destructive" });
       return;
     }
     setSubmitting(true);
@@ -186,11 +190,10 @@ export default function SocioNuevo() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label>Plan</Label>
+              <Label>Plan *</Label>
               <Select value={form.plan_id} onValueChange={v => setForm({ ...form, plan_id: v })}>
-                <SelectTrigger><SelectValue placeholder="Sin plan" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="Seleccioná un plan" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">Sin plan asignado</SelectItem>
                   {plans.map(p => (
                     <SelectItem key={p.id} value={p.id}>
                       {p.name} — {p.currency} {p.price} ({p.duration_days}d)
