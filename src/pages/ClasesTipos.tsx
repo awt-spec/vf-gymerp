@@ -81,7 +81,7 @@ export default function ClasesTipos() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="flex flex-col gap-2 max-w-3xl">
           {classes.map((c) => (
             <Card key={c.id} className="border-border/50 hover:border-primary/50 transition-colors group">
               <CardContent className="p-4">
