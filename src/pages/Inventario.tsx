@@ -12,8 +12,10 @@ import { Plus, Trash2, Search, Check, Camera, Upload, Image as ImageIcon, Play, 
 import { PRESET_MACHINES, type PresetMachine } from "@/data/presetMachines";
 import { cn } from "@/lib/utils";
 import GymAiAssistant from "@/components/GymAiAssistant";
+import { useGym } from "@/hooks/useGym";
 
 export default function Inventario() {
+  const { gymId } = useGym();
   const [items, setItems] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -32,11 +34,12 @@ export default function Inventario() {
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const fetchData = async () => {
-    const { data } = await supabase.from("inventory").select("*").order("category, name");
+    if (!gymId) { setItems([]); return; }
+    const { data } = await supabase.from("inventory").select("*").eq("gym_id", gymId).order("category, name");
     setItems(data ?? []);
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [gymId]);
 
   const existingNames = new Set(items.map(i => i.name));
   const itemCategories = ["todos", ...Array.from(new Set(items.map(i => i.category)))];
@@ -61,11 +64,12 @@ export default function Inventario() {
   };
 
   const handleAddSelected = async () => {
+    if (!gymId) { toast({ title: "Selecciona un gimnasio", variant: "destructive" }); return; }
     const toAdd = Array.from(selectedMachines.entries())
       .filter(([name]) => !existingNames.has(name))
       .map(([name, data]) => {
         const preset = PRESET_MACHINES.find(p => p.name === name)!;
-        return { name: preset.name, category: preset.category, quantity: data.quantity, min_stock: 0, unit_cost: 0, image_url: preset.image, weight_kg: data.weight_kg ?? null };
+        return { name: preset.name, category: preset.category, quantity: data.quantity, min_stock: 0, unit_cost: 0, image_url: preset.image, weight_kg: data.weight_kg ?? null, gym_id: gymId };
       });
     if (toAdd.length === 0) { toast({ title: "No hay nuevos" }); return; }
     const { error } = await supabase.from("inventory").insert(toAdd);
@@ -83,6 +87,7 @@ export default function Inventario() {
 
   const handleAddCustom = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!gymId) { toast({ title: "Selecciona un gimnasio", variant: "destructive" }); return; }
     setUploading(true);
     let imageUrl: string | null = null;
     if (customPhoto) {
@@ -94,7 +99,7 @@ export default function Inventario() {
     const { error } = await supabase.from("inventory").insert({
       name: customForm.name, category: customForm.category, quantity: Number(customForm.quantity),
       min_stock: 0, unit_cost: 0, image_url: imageUrl, weight_kg: customForm.weight_kg ? Number(customForm.weight_kg) : null,
-      video_url: customForm.video_url || null,
+      video_url: customForm.video_url || null, gym_id: gymId,
     });
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); setUploading(false); return; }
     toast({ title: "Agregado ✅" });
