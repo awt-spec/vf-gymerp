@@ -93,26 +93,49 @@ export function Level3Basic({ summary, monthExpenses, monthPayments, monthShopSa
       </div>
 
       {/* Recent income */}
-      <div className="space-y-2">
-        <h2 className="text-sm font-display font-semibold text-muted-foreground flex items-center gap-1.5">
-          <TrendingUp className="h-4 w-4" />Ingresos del mes ({monthPayments.filter(p => p.status === "paid").length})
-        </h2>
-        {monthPayments.filter(p => p.status === "paid").length === 0 ? (
-          <p className="text-muted-foreground text-xs text-center py-4">Sin ingresos este mes</p>
-        ) : (
-          <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
-            {monthPayments.filter(p => p.status === "paid").map(p => (
-              <div key={p.id} className="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-card border border-border/50">
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium truncate">{p.members?.first_name} {p.members?.last_name}</p>
-                  <span className="text-[10px] text-muted-foreground">{PAYMENT_METHODS[p.payment_method]} · {format(new Date(p.payment_date), "dd MMM", { locale: es })}</span>
-                </div>
-                <span className="text-primary font-semibold text-sm">+{formatCurrency(Number(p.amount), p.currency)}</span>
+      {(() => {
+        const paidPayments = monthPayments.filter(p => p.status === "paid");
+        const incomeItems = [
+          ...paidPayments.map(p => ({
+            id: `p-${p.id}`,
+            label: `${p.members?.first_name ?? ""} ${p.members?.last_name ?? ""}`.trim() || "Pago",
+            sub: `Membresía · ${PAYMENT_METHODS[p.payment_method] || p.payment_method} · ${format(new Date(p.payment_date), "dd MMM", { locale: es })}`,
+            amount: Number(p.amount),
+            currency: p.currency,
+            date: p.payment_date,
+          })),
+          ...monthShopSales.map(s => ({
+            id: `s-${s.id}`,
+            label: s.shop_products?.name || "Venta tienda",
+            sub: `Tienda · ${PAYMENT_METHODS[s.payment_method] || s.payment_method} · ${format(new Date(s.sale_date), "dd MMM", { locale: es })}`,
+            amount: Number(s.total_amount),
+            currency: s.currency,
+            date: s.sale_date,
+          })),
+        ].sort((a, b) => b.date.localeCompare(a.date));
+        return (
+          <div className="space-y-2">
+            <h2 className="text-sm font-display font-semibold text-muted-foreground flex items-center gap-1.5">
+              <TrendingUp className="h-4 w-4" />Ingresos del mes ({incomeItems.length})
+            </h2>
+            {incomeItems.length === 0 ? (
+              <p className="text-muted-foreground text-xs text-center py-4">Sin ingresos este mes</p>
+            ) : (
+              <div className="space-y-1.5 max-h-[240px] overflow-y-auto">
+                {incomeItems.map(item => (
+                  <div key={item.id} className="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-card border border-border/50">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium truncate">{item.label}</p>
+                      <span className="text-[10px] text-muted-foreground">{item.sub}</span>
+                    </div>
+                    <span className="text-primary font-semibold text-sm">+{formatCurrency(item.amount, item.currency)}</span>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
-        )}
-      </div>
+        );
+      })()}
 
       {/* Expenses */}
       <div className="space-y-2">
