@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Search, IdCard } from "lucide-react";
+import { Plus, Search, Upload, MoreHorizontal, Eye, Pencil, Power, AlertTriangle } from "lucide-react";
 import { MemberQRCode } from "@/components/MemberQRCode";
 import { useGym } from "@/hooks/useGym";
 import GymAiAssistant from "@/components/GymAiAssistant";
@@ -22,6 +22,7 @@ type Member = {
   phone: string | null;
   cedula: string;
   status: "active" | "inactive" | "suspended";
+  notes: string | null;
   created_at: string;
 };
 
@@ -29,10 +30,8 @@ export default function Socios() {
   const [members, setMembers] = useState<Member[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ first_name: "", last_name: "", email: "", phone: "", cedula: "" });
-  const [loading, setLoading] = useState(false);
   const { gymId } = useGym();
+  const navigate = useNavigate();
 
   const fetchMembers = async () => {
     let query = supabase.from("members").select("*").order("created_at", { ascending: false });
@@ -43,40 +42,17 @@ export default function Socios() {
     setMembers((data as Member[]) ?? []);
   };
 
-  useEffect(() => { fetchMembers(); }, [search, statusFilter]);
+  useEffect(() => { fetchMembers(); }, [search, statusFilter, gymId]);
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.cedula.trim()) {
-      toast({ title: "Error", description: "La cédula es obligatoria", variant: "destructive" });
+  const toggleActive = async (m: Member) => {
+    const next = m.status === "active" ? "inactive" : "active";
+    const { error } = await supabase.from("members").update({ status: next }).eq("id", m.id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
       return;
     }
-    if (!form.email.trim()) {
-      toast({ title: "Error", description: "El email es obligatorio", variant: "destructive" });
-      return;
-    }
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("create-member-auth", {
-        body: {
-          cedula: form.cedula,
-          email: form.email,
-          first_name: form.first_name,
-          last_name: form.last_name,
-          phone: form.phone,
-          gym_id: gymId,
-        },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      toast({ title: "Socio creado ✅", description: `Contraseña inicial: ${form.cedula}` });
-      setOpen(false);
-      setForm({ first_name: "", last_name: "", email: "", phone: "", cedula: "" });
-      fetchMembers();
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
-    }
-    setLoading(false);
+    toast({ title: next === "active" ? "Usuario activado" : "Usuario desactivado" });
+    fetchMembers();
   };
 
   const statusBadge = (status: string) => {
@@ -102,42 +78,14 @@ export default function Socios() {
             {members.filter(m => m.status === "suspended").length > 0 && <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-medium">{members.filter(m => m.status === "suspended").length} suspendidos</span>}
           </div>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button><Plus className="mr-2 h-4 w-4" />Nuevo Usuario</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle className="font-display">Registrar Usuario</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleCreate} className="space-y-4">
-              <div className="space-y-2">
-                <Label className="flex items-center gap-1.5"><IdCard className="h-3.5 w-3.5" />Cédula *</Label>
-                <Input value={form.cedula} onChange={(e) => setForm({ ...form, cedula: e.target.value })} required placeholder="Número de cédula" />
-                <p className="text-[10px] text-muted-foreground">La cédula será el usuario y contraseña inicial</p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Nombre *</Label>
-                  <Input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} required />
-                </div>
-                <div className="space-y-2">
-                  <Label>Apellido *</Label>
-                  <Input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} required />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Email *</Label>
-                <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required placeholder="Para recuperar contraseña" />
-              </div>
-              <div className="space-y-2">
-                <Label>Teléfono</Label>
-                <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-              </div>
-              <Button type="submit" className="w-full" disabled={loading}>{loading ? "Creando cuenta..." : "Registrar Usuario"}</Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link to="/socios/importar"><Upload className="mr-2 h-4 w-4" />Importar CSV</Link>
+          </Button>
+          <Button asChild>
+            <Link to="/socios/nuevo"><Plus className="mr-2 h-4 w-4" />Nuevo Usuario</Link>
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
@@ -146,9 +94,7 @@ export default function Socios() {
           <Input placeholder="Buscar por nombre, email o cédula..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" aria-label="Buscar usuarios" />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-40">
-            <SelectValue />
-          </SelectTrigger>
+          <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos</SelectItem>
             <SelectItem value="active">Activos</SelectItem>
@@ -169,20 +115,50 @@ export default function Socios() {
                 <TableHead>Teléfono</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead>QR</TableHead>
+                <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {members.length === 0 ? (
-                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No hay usuarios registrados</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">No hay usuarios registrados</TableCell></TableRow>
               ) : (
                 members.map((m) => (
-                  <TableRow key={m.id}>
+                  <TableRow key={m.id} className="cursor-pointer" onClick={() => navigate(`/socios/${m.id}`)}>
                     <TableCell className="font-medium">{m.first_name} {m.last_name}</TableCell>
                     <TableCell className="font-mono text-xs">{m.cedula || "—"}</TableCell>
                     <TableCell>{m.email ?? "—"}</TableCell>
                     <TableCell>{m.phone ?? "—"}</TableCell>
-                    <TableCell>{statusBadge(m.status)}</TableCell>
-                    <TableCell><MemberQRCode memberId={m.id} memberName={`${m.first_name} ${m.last_name}`} /></TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5">
+                        {statusBadge(m.status)}
+                        {m.status === "suspended" && m.notes && (
+                          <span title={m.notes}><AlertTriangle className="h-3.5 w-3.5 text-destructive" /></span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <MemberQRCode memberId={m.id} memberName={`${m.first_name} ${m.last_name}`} />
+                    </TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => navigate(`/socios/${m.id}`)}>
+                            <Eye className="h-4 w-4 mr-2" />Ver detalle
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => navigate(`/socios/${m.id}/editar`)}>
+                            <Pencil className="h-4 w-4 mr-2" />Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => toggleActive(m)}>
+                            <Power className="h-4 w-4 mr-2" />
+                            {m.status === "active" ? "Desactivar" : "Activar"}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
                   </TableRow>
                 ))
               )}
