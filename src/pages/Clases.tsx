@@ -358,15 +358,22 @@ export default function Clases() {
       </Card>
 
       {/* Schedule detail dialog */}
-      <Dialog open={!!detailSchedule} onOpenChange={(o) => !o && setDetailSchedule(null)}>
-        <DialogContent className="max-w-md">
+      <Dialog open={!!detailSchedule} onOpenChange={(o) => { if (!o) { setDetailSchedule(null); setBookingPickerOpen(false); } }}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
           {detailSchedule && (() => {
-            const counts = bookingsBySchedule[detailSchedule.id] ?? { booked: 0, attended: 0, cancelled: 0 };
-            const occupied = counts.booked + counts.attended;
             const cap = detailSchedule.classes?.max_capacity ?? 0;
+            const bookingDate = nextDateForDay(detailSchedule.day_of_week);
+            const dateBookings = bookings.filter(
+              (b) => b.class_schedule_id === detailSchedule.id && b.booking_date === bookingDate && b.status !== "cancelled"
+            );
+            const occupied = dateBookings.length;
             const pct = cap > 0 ? (occupied / cap) * 100 : 0;
             const isFull = occupied >= cap;
             const color = classColorMap[detailSchedule.class_id] ?? CLASS_COLORS[0];
+            const bookedMemberIds = new Set(dateBookings.map((b) => b.member_id));
+            const available = eligibleMembers.filter((m) => !bookedMemberIds.has(m.id));
+            const bookingDateLabel = new Date(bookingDate + "T12:00").toLocaleDateString("es", { weekday: "long", day: "numeric", month: "long" });
+
             return (
               <>
                 <DialogHeader>
@@ -377,6 +384,7 @@ export default function Clases() {
                       <p className="text-xs text-muted-foreground mt-0.5">
                         {DAYS_FULL[detailSchedule.day_of_week]} · {detailSchedule.start_time.slice(0, 5)} – {detailSchedule.end_time.slice(0, 5)}
                       </p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5 capitalize">Próxima sesión: {bookingDateLabel}</p>
                     </div>
                   </div>
                 </DialogHeader>
@@ -404,8 +412,8 @@ export default function Clases() {
 
                   <div className="rounded-lg border border-border/40 p-3">
                     <div className="flex items-center justify-between mb-2">
-                      <p className="text-[10px] uppercase text-muted-foreground font-semibold">Cupo</p>
-                      <p className="text-sm font-display font-bold">
+                      <p className="text-[10px] uppercase text-muted-foreground font-semibold">Cupo (esta sesión)</p>
+                      <p className="text-sm font-display font-bold flex items-center">
                         {occupied} / {cap}
                         {isFull && <Badge variant="destructive" className="ml-2 text-[9px]">Lleno</Badge>}
                       </p>
@@ -416,11 +424,80 @@ export default function Clases() {
                         style={{ width: `${Math.min(pct, 100)}%`, background: color.border }}
                       />
                     </div>
-                    <div className="flex gap-3 mt-2 text-[10px] text-muted-foreground">
-                      <span>📅 {counts.booked} reservadas</span>
-                      <span>✅ {counts.attended} asistieron</span>
-                      {counts.cancelled > 0 && <span>❌ {counts.cancelled} canceladas</span>}
+                  </div>
+
+                  {/* Reservas */}
+                  <div className="rounded-lg border border-border/40 p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] uppercase text-muted-foreground font-semibold">Reservados ({occupied})</p>
+                      <Popover open={bookingPickerOpen} onOpenChange={setBookingPickerOpen}>
+                        <PopoverTrigger asChild>
+                          <Button size="sm" variant="outline" disabled={isFull || savingBooking} className="h-7 text-xs">
+                            <UserPlus className="h-3 w-3 mr-1" />Reservar socio
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-72 p-0" align="end">
+                          <Command>
+                            <CommandInput placeholder="Buscar socio elegible..." className="h-9" />
+                            <CommandList>
+                              <CommandEmpty>
+                                {eligibleMembers.length === 0
+                                  ? "No hay socios activos con plan vigente."
+                                  : "Sin resultados."}
+                              </CommandEmpty>
+                              <CommandGroup>
+                                {available.map((m) => (
+                                  <CommandItem
+                                    key={m.id}
+                                    value={`${m.first_name} ${m.last_name} ${m.cedula}`}
+                                    onSelect={() => handleBookMember(m.id)}
+                                  >
+                                    <Check className="h-3 w-3 mr-2 opacity-0" />
+                                    <div className="min-w-0 flex-1">
+                                      <p className="text-sm truncate">{m.first_name} {m.last_name}</p>
+                                      <p className="text-[10px] text-muted-foreground truncate">{m.cedula}</p>
+                                    </div>
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                          <div className="px-3 py-2 border-t border-border/40 text-[10px] text-muted-foreground">
+                            Solo socios activos con plan vigente
+                          </div>
+                        </PopoverContent>
+                      </Popover>
                     </div>
+
+                    {dateBookings.length === 0 ? (
+                      <p className="text-xs text-muted-foreground text-center py-3">Sin reservas para esta sesión</p>
+                    ) : (
+                      <div className="space-y-1 max-h-40 overflow-y-auto">
+                        {dateBookings.map((b) => (
+                          <div key={b.id} className="flex items-center justify-between gap-2 py-1.5 px-2 rounded bg-muted/30">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                                <User className="h-3 w-3 text-primary" />
+                              </div>
+                              <p className="text-sm truncate">
+                                {b.members?.first_name} {b.members?.last_name}
+                              </p>
+                              {b.status === "attended" && (
+                                <Badge variant="default" className="text-[9px] h-4">Asistió</Badge>
+                              )}
+                            </div>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-6 w-6 text-destructive hover:text-destructive shrink-0"
+                              onClick={() => handleCancelBooking(b.id)}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex gap-2 pt-2">
