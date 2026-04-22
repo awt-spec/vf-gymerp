@@ -115,7 +115,7 @@ export default function Usuarios() {
   };
 
   if (!isAdmin && !isSuperAdmin) {
-    return <div className="text-sm text-muted-foreground">Solo administradores pueden gestionar usuarios.</div>;
+    return <div className="text-sm text-muted-foreground">Solo administradores pueden gestionar socios.</div>;
   }
 
   const filtered = rows.filter(r => {
@@ -131,10 +131,10 @@ export default function Usuarios() {
         <div>
           <h1 className="text-xl md:text-3xl font-display font-bold flex items-center gap-2">
             <Users className="h-6 w-6 text-primary" />
-            Usuarios de la Plataforma
+            Socios del Equipo
           </h1>
           <p className="text-muted-foreground text-sm mt-0.5">
-            Gestioná coaches, recepcionistas y administradores de tu gimnasio
+            Gestioná coaches, recepcionistas y administradores que trabajan en tu gimnasio
           </p>
         </div>
         <div className="flex gap-2">
@@ -142,7 +142,7 @@ export default function Usuarios() {
             <Link to="/usuarios/importar"><Upload className="mr-1 h-4 w-4" />Importar CSV</Link>
           </Button>
           <Button size="sm" asChild>
-            <Link to="/usuarios/nuevo"><UserPlus className="mr-1 h-4 w-4" />Nuevo Usuario</Link>
+            <Link to="/usuarios/nuevo"><UserPlus className="mr-1 h-4 w-4" />Nuevo Socio</Link>
           </Button>
         </div>
       </div>
@@ -162,7 +162,7 @@ export default function Usuarios() {
       ) : filtered.length === 0 ? (
         <Card className="border-dashed"><CardContent className="py-12 text-center text-sm text-muted-foreground">
           <Users className="h-8 w-8 mx-auto mb-2 opacity-30" />
-          {rows.length === 0 ? "Sin usuarios todavía. Creá uno para empezar." : "Sin resultados para tu búsqueda."}
+          {rows.length === 0 ? "Sin socios todavía. Creá uno para empezar." : "Sin resultados para tu búsqueda."}
         </CardContent></Card>
       ) : (
         <Card>
@@ -170,7 +170,7 @@ export default function Usuarios() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Usuario</TableHead>
+                  <TableHead>Socio</TableHead>
                   <TableHead>Rol</TableHead>
                   <TableHead>Estado</TableHead>
                   <TableHead>Alta</TableHead>

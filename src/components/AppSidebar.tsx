@@ -18,7 +18,7 @@ import {
 
 const sharedItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Socios", url: "/socios", icon: Users },
+  { title: "Usuarios", url: "/socios", icon: Users },
   { title: "Control de Acceso", url: "/acceso", icon: ScanLine },
   { title: "Clases y Horarios", url: "/clases", icon: CalendarDays },
 ];
@@ -26,7 +26,7 @@ const sharedItems = [
 const coachItems = [
   { title: "Planes Ejercicio", url: "/planes-ejercicio", icon: Dumbbell },
   { title: "Planes Nutrición", url: "/planes-nutricion", icon: Apple },
-  { title: "Progreso Socios", url: "/progreso", icon: TrendingUp },
+  { title: "Progreso Usuarios", url: "/progreso", icon: TrendingUp },
 ];
 
 const receptionistItems = [
@@ -46,7 +46,7 @@ const adminItems = [
   { title: "Contabilidad", url: "/contabilidad", icon: Receipt },
   { title: "Inventario", url: "/inventario", icon: Package },
   { title: "Reportes", url: "/reportes", icon: BarChart3 },
-  { title: "Usuarios", url: "/usuarios", icon: UserCog },
+  { title: "Socios", url: "/usuarios", icon: UserCog },
 ];
 
 const memberItems = [

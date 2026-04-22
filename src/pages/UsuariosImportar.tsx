@@ -120,10 +120,10 @@ export default function UsuariosImportar() {
         <div>
           <h1 className="text-xl md:text-2xl font-display font-bold flex items-center gap-2">
             <Upload className="h-5 w-5 text-primary" />
-            Importar Usuarios desde CSV
+            Importar Socios desde CSV
           </h1>
           <p className="text-muted-foreground text-xs">
-            Cargá múltiples coaches, recepcionistas o admins de una vez
+            Cargá múltiples coaches, recepcionistas o admins del equipo de una vez
           </p>
         </div>
       </div>
@@ -156,7 +156,7 @@ export default function UsuariosImportar() {
           </div>
           <Button onClick={handleImport} disabled={!file || importing} className="w-full">
             {importing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
-            {importing ? "Importando…" : "Importar usuarios"}
+            {importing ? "Importando…" : "Importar socios"}
           </Button>
         </CardContent>
       </Card>
@@ -181,7 +181,7 @@ export default function UsuariosImportar() {
             </div>
             <div className="flex gap-2 mt-4">
               <Button variant="outline" onClick={() => navigate("/usuarios")} className="flex-1">
-                Volver a Usuarios
+                Volver a Socios
               </Button>
             </div>
           </CardContent>
