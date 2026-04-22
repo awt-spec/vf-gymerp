@@ -81,7 +81,7 @@ export default function ClasesTipos() {
           </CardContent>
         </Card>
       ) : (
-        <div className="flex flex-col gap-2 max-w-3xl">
+        <div className="flex flex-col gap-2 px-2 sm:px-4">
           {classes.map((c) => (
             <Card key={c.id} className="border-border/50 hover:border-primary/50 transition-colors group">
               <CardContent className="p-4">
@@ -97,7 +97,7 @@ export default function ClasesTipos() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100">
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
