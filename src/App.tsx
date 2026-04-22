@@ -10,7 +10,6 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { GymProvider } from "@/hooks/useGym";
 import Index from "./pages/Index";
 import GymLanding from "./pages/GymLanding";
-import GymLogin from "./pages/GymLogin";
 import Socios from "./pages/Socios";
 import Planes from "./pages/Planes";
 import PlanEditor from "./pages/PlanEditor";
@@ -76,7 +75,6 @@ const App = () => (
                   }
                 />
                 <Route path="/gym/:slug" element={<GymLanding />} />
-                <Route path="/gym/:slug/login" element={<GymLogin />} />
                 <Route
                   element={
                     <ProtectedRoute>

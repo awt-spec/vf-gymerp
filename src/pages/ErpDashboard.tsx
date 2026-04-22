@@ -392,7 +392,7 @@ export default function ErpDashboard() {
                             {copiedField === `dash-link-${gym.id}` ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
                           </button>
                         </div>
-                        <button onClick={() => copyToClipboard(`${getBaseUrl()}/gym/${gym.slug}/login`, `dash-login-${gym.id}`)}
+                        <button onClick={() => copyToClipboard(`${getBaseUrl()}/`, `dash-login-${gym.id}`)}
                           className="flex items-center gap-1 text-[10px] text-indigo-400 hover:text-indigo-600">
                           <Lock className="h-3 w-3" /> Login
                           {copiedField === `dash-login-${gym.id}` ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
@@ -797,9 +797,9 @@ export default function ErpDashboard() {
                   <p className="text-[10px] text-slate-400 uppercase tracking-widest mb-1">Login del Admin</p>
                   <div className="flex items-center gap-2">
                     <code className="text-xs bg-white px-2 py-1 rounded border border-slate-200 flex-1 truncate">
-                      {getBaseUrl()}/gym/{createdGymResult.slug}/login
+                      {getBaseUrl()}/
                     </code>
-                    <button onClick={() => copyToClipboard(`${getBaseUrl()}/gym/${createdGymResult.slug}/login`, "cred-login")}
+                    <button onClick={() => copyToClipboard(`${getBaseUrl()}/`, "cred-login")}
                       className="text-slate-400 hover:text-indigo-600 transition-colors">
                       {copiedField === "cred-login" ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
                     </button>
@@ -835,7 +835,7 @@ export default function ErpDashboard() {
 
               <div className="flex gap-2">
                 <Button variant="outline" className="flex-1 text-xs gap-1" onClick={() => {
-                  const text = `🏋️ ${createdGymResult.gym_name}\n\n🔗 Landing: ${getBaseUrl()}/gym/${createdGymResult.slug}\n🔐 Login: ${getBaseUrl()}/gym/${createdGymResult.slug}/login\n📧 Email: ${createdGymResult.admin_email}\n🔑 Contraseña: ${createdGymResult.admin_password}`;
+                  const text = `🏋️ ${createdGymResult.gym_name}\n\n🔗 Landing: ${getBaseUrl()}/gym/${createdGymResult.slug}\n🔐 Login: ${getBaseUrl()}/\n📧 Email: ${createdGymResult.admin_email}\n🔑 Contraseña: ${createdGymResult.admin_password}`;
                   copyToClipboard(text, "cred-all");
                 }}>
                   {copiedField === "cred-all" ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}

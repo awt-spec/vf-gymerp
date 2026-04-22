@@ -295,7 +295,7 @@ export default function GymDetailPanel({ gymId, onBack }: GymDetailPanelProps) {
         <div className="flex flex-wrap gap-3">
           {[
             { label: "Landing Page", url: `${getBaseUrl()}/gym/${gym.slug}`, field: "det-landing", icon: ExternalLink },
-            { label: "Login Admin", url: `${getBaseUrl()}/gym/${gym.slug}/login`, field: "det-login", icon: Lock },
+            { label: "Login Admin", url: `${getBaseUrl()}/`, field: "det-login", icon: Lock },
             { label: "ERP Dashboard", url: `${getBaseUrl()}/dashboard`, field: "det-erp", icon: BarChart3 },
           ].map(link => (
             <div key={link.field} className="flex items-center gap-2 bg-slate-50 rounded-lg px-3 py-2">

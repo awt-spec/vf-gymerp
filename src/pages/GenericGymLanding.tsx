@@ -24,7 +24,7 @@ const fadeUp = {
 
 export default function GenericGymLanding({ gym }: { gym: GymInfo }) {
   const navigate = useNavigate();
-  const loginPath = `/gym/${gym.slug}/login`;
+  const loginPath = `/`;
   const accent = gym.primary_color || "#6366f1";
 
   return (

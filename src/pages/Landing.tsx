@@ -69,7 +69,7 @@ const WAZE_URL = "https://ul.waze.com/ul?venue_id=180748388.1807483875.41361842&
 export default function Landing({ gymSlug = "elevate" }: { gymSlug?: string }) {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const loginPath = `/gym/${gymSlug}/login`;
+  const loginPath = `/`;
 
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
