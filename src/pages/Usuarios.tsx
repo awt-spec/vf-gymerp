@@ -190,7 +190,6 @@ export default function Usuarios() {
                           </div>
                           <div className="min-w-0">
                             <p className="text-sm font-medium truncate">{row.full_name ?? "Sin nombre"}</p>
-                            {isSelf && <Badge variant="outline" className="text-[9px] mt-0.5">Vos</Badge>}
                           </div>
                         </div>
                       </TableCell>
