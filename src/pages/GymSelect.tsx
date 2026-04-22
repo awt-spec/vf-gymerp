@@ -13,7 +13,7 @@ export default function GymSelect() {
     e.preventDefault();
     const clean = slug.trim().toLowerCase().replace(/\s+/g, "-");
     if (!clean) return;
-    navigate(`/gym/${clean}/login`);
+    navigate(`/gym/${clean}`);
   };
 
   return (
