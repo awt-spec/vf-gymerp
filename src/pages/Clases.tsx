@@ -34,8 +34,19 @@ export default function Clases() {
   const [classes, setClasses] = useState<any[]>([]);
   const [schedules, setSchedules] = useState<any[]>([]);
   const [bookings, setBookings] = useState<any[]>([]);
+  const [eligibleMembers, setEligibleMembers] = useState<any[]>([]);
   const [detailSchedule, setDetailSchedule] = useState<any | null>(null);
   const [slotDialog, setSlotDialog] = useState<{ items: any[]; label: string } | null>(null);
+  const [bookingPickerOpen, setBookingPickerOpen] = useState(false);
+  const [savingBooking, setSavingBooking] = useState(false);
+
+  // Default booking_date = next occurrence of the schedule's day_of_week
+  const nextDateForDay = (dow: number) => {
+    const today = new Date();
+    const diff = (dow - today.getDay() + 7) % 7;
+    const d = new Date(today); d.setDate(today.getDate() + diff);
+    return d.toISOString().slice(0, 10);
+  };
 
   const fetchData = async () => {
     if (!gymId) return;
@@ -46,11 +57,22 @@ export default function Clases() {
       : { data: [] as any[] };
     const scheduleIds = (schedulesRes.data ?? []).map((s: any) => s.id);
     const bookingsRes = scheduleIds.length
-      ? await supabase.from("class_bookings").select("class_schedule_id, status").in("class_schedule_id", scheduleIds)
+      ? await supabase.from("class_bookings").select("id, class_schedule_id, status, booking_date, member_id, members(first_name, last_name)").in("class_schedule_id", scheduleIds)
       : { data: [] as any[] };
+
+    // Eligible members: active status + at least one active subscription
+    const membersRes = await supabase
+      .from("members")
+      .select("id, first_name, last_name, status, cedula, subscriptions!inner(id, status, end_date)")
+      .eq("gym_id", gymId)
+      .eq("status", "active")
+      .eq("subscriptions.status", "active")
+      .gte("subscriptions.end_date", new Date().toISOString().slice(0, 10));
+
     setClasses(classesRes.data ?? []);
     setSchedules(schedulesRes.data ?? []);
     setBookings(bookingsRes.data ?? []);
+    setEligibleMembers(membersRes.data ?? []);
   };
 
   useEffect(() => { fetchData(); }, [gymId]);
