@@ -231,7 +231,7 @@ export default function RegisterGym() {
 
         <div className="text-center">
           <button
-            onClick={() => navigate("/admin")}
+            onClick={() => navigate("/")}
             className="text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
             ¿Ya tenés cuenta? Iniciá sesión

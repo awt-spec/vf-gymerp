@@ -28,7 +28,6 @@ import ProgresoSocio from "./pages/ProgresoSocio";
 import Perfil from "./pages/Perfil";
 import MiGym from "./pages/MiGym";
 
-import AdminLogin from "./pages/AdminLogin";
 import ErpDashboard from "./pages/ErpDashboard";
 import RegisterGym from "./pages/RegisterGym";
 import Onboarding from "./pages/Onboarding";
@@ -55,7 +54,6 @@ const App = () => (
                 <Route path="/" element={<RootLanding />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/gym-select" element={<GymSelect />} />
-                <Route path="/admin" element={<AdminLogin />} />
                 <Route
                   path="/erp-dashboard"
                   element={
