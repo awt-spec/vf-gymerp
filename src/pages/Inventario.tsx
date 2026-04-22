@@ -34,11 +34,12 @@ export default function Inventario() {
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const fetchData = async () => {
-    const { data } = await supabase.from("inventory").select("*").order("category, name");
+    if (!gymId) { setItems([]); return; }
+    const { data } = await supabase.from("inventory").select("*").eq("gym_id", gymId).order("category, name");
     setItems(data ?? []);
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [gymId]);
 
   const existingNames = new Set(items.map(i => i.name));
   const itemCategories = ["todos", ...Array.from(new Set(items.map(i => i.category)))];
