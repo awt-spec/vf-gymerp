@@ -21,11 +21,12 @@ interface Props {
   summary: AccountingSummary;
   monthExpenses: any[];
   monthPayments: any[];
+  monthShopSales?: any[];
   cashRegisters: any[];
   refetch: () => void;
 }
 
-export function Level3Basic({ summary, monthExpenses, monthPayments, cashRegisters, refetch }: Props) {
+export function Level3Basic({ summary, monthExpenses, monthPayments, monthShopSales = [], cashRegisters, refetch }: Props) {
   const [arqueoOpen, setArqueoOpen] = useState(false);
   const [arqueo, setArqueo] = useState({ expected_amount: "", actual_amount: "", notes: "" });
 
