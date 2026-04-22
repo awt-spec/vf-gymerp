@@ -176,6 +176,40 @@ export default function Clases() {
     fetchData();
   };
 
+  const handleBookMember = async (memberId: string) => {
+    if (!detailSchedule) return;
+    const cap = detailSchedule.classes?.max_capacity ?? 0;
+    const bookingDate = nextDateForDay(detailSchedule.day_of_week);
+    const currentActive = bookings.filter(
+      (b) => b.class_schedule_id === detailSchedule.id && b.booking_date === bookingDate && b.status !== "cancelled"
+    );
+    if (currentActive.length >= cap) {
+      return toast({ title: "Cupo lleno", description: "No quedan espacios para esta fecha.", variant: "destructive" });
+    }
+    if (currentActive.some((b) => b.member_id === memberId)) {
+      return toast({ title: "Ya reservado", description: "El socio ya está reservado para esta fecha.", variant: "destructive" });
+    }
+    setSavingBooking(true);
+    const { error } = await supabase.from("class_bookings").insert({
+      class_schedule_id: detailSchedule.id,
+      member_id: memberId,
+      booking_date: bookingDate,
+      status: "booked",
+    });
+    setSavingBooking(false);
+    setBookingPickerOpen(false);
+    if (error) return toast({ title: "Error", description: error.message, variant: "destructive" });
+    toast({ title: "Reserva creada" });
+    fetchData();
+  };
+
+  const handleCancelBooking = async (bookingId: string) => {
+    const { error } = await supabase.from("class_bookings").delete().eq("id", bookingId);
+    if (error) return toast({ title: "Error", description: error.message, variant: "destructive" });
+    toast({ title: "Reserva cancelada" });
+    fetchData();
+  };
+
   const startMin = HOURS[0] * 60;
   const totalHeight = HOURS.length * HOUR_HEIGHT;
 
