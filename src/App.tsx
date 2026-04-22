@@ -30,7 +30,6 @@ import MiGym from "./pages/MiGym";
 
 import ErpDashboard from "./pages/ErpDashboard";
 import RegisterGym from "./pages/RegisterGym";
-import RegisterGym from "./pages/RegisterGym";
 import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 import RootLanding from "./pages/RootLanding";
