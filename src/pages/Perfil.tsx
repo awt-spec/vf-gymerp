@@ -24,7 +24,7 @@ export default function Perfil() {
       .from("profiles")
       .select("*")
       .eq("id", user.id)
-      .single()
+      .maybeSingle()
       .then(({ data }) => {
         if (data) setProfile({ full_name: data.full_name || "", phone: data.phone || "", bio: data.bio || "", avatar_url: data.avatar_url || "" });
         setLoading(false);
@@ -36,8 +36,10 @@ export default function Perfil() {
     setSaving(true);
     const { error } = await supabase
       .from("profiles")
-      .update({ full_name: profile.full_name, phone: profile.phone, bio: profile.bio, avatar_url: profile.avatar_url })
-      .eq("id", user.id);
+      .upsert(
+        { id: user.id, full_name: profile.full_name, phone: profile.phone, bio: profile.bio, avatar_url: profile.avatar_url, updated_at: new Date().toISOString() },
+        { onConflict: "id" }
+      );
     setSaving(false);
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
     else toast({ title: "Perfil actualizado ✅" });
