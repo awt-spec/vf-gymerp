@@ -39,6 +39,7 @@ import GymSelect from "./pages/GymSelect";
 import SetupWizard from "./pages/SetupWizard";
 import Usuarios from "./pages/Usuarios";
 import CierresCaja from "./pages/CierresCaja";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,7 @@ const App = () => (
             <GymProvider>
               <Routes>
                 <Route path="/" element={<RootLanding />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/gym-select" element={<GymSelect />} />
                 <Route path="/admin" element={<AdminLogin />} />
                 <Route
