@@ -87,6 +87,7 @@ export default function Inventario() {
 
   const handleAddCustom = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!gymId) { toast({ title: "Selecciona un gimnasio", variant: "destructive" }); return; }
     setUploading(true);
     let imageUrl: string | null = null;
     if (customPhoto) {
@@ -98,7 +99,7 @@ export default function Inventario() {
     const { error } = await supabase.from("inventory").insert({
       name: customForm.name, category: customForm.category, quantity: Number(customForm.quantity),
       min_stock: 0, unit_cost: 0, image_url: imageUrl, weight_kg: customForm.weight_kg ? Number(customForm.weight_kg) : null,
-      video_url: customForm.video_url || null,
+      video_url: customForm.video_url || null, gym_id: gymId,
     });
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); setUploading(false); return; }
     toast({ title: "Agregado ✅" });
