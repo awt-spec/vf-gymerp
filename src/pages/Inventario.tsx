@@ -12,8 +12,10 @@ import { Plus, Trash2, Search, Check, Camera, Upload, Image as ImageIcon, Play, 
 import { PRESET_MACHINES, type PresetMachine } from "@/data/presetMachines";
 import { cn } from "@/lib/utils";
 import GymAiAssistant from "@/components/GymAiAssistant";
+import { useGym } from "@/hooks/useGym";
 
 export default function Inventario() {
+  const { gymId } = useGym();
   const [items, setItems] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
