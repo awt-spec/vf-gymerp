@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "@/hooks/use-toast";
-import { Plus, CalendarDays, Users, TrendingUp, Activity, Pencil, Trash2, Clock, User, List, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, CalendarDays, Users, TrendingUp, Activity, Pencil, Trash2, Clock, User, List, UserPlus, Check, X } from "lucide-react";
 import GymAiAssistant from "@/components/GymAiAssistant";
 
 const DAYS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
