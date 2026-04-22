@@ -854,18 +854,21 @@ export type Database = {
           created_at: string
           gym_id: string
           id: string
+          is_active: boolean
           user_id: string
         }
         Insert: {
           created_at?: string
           gym_id: string
           id?: string
+          is_active?: boolean
           user_id: string
         }
         Update: {
           created_at?: string
           gym_id?: string
           id?: string
+          is_active?: boolean
           user_id?: string
         }
         Relationships: [
