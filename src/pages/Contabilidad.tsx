@@ -32,6 +32,7 @@ export default function Contabilidad() {
               summary={data.summary}
               monthExpenses={data.monthExpenses}
               monthPayments={data.monthPayments}
+              monthShopSales={data.monthShopSales}
               cashRegisters={data.cashRegisters}
               refetch={data.refetch}
             />
@@ -41,6 +42,7 @@ export default function Contabilidad() {
               summary={data.summary}
               monthExpenses={data.monthExpenses}
               monthPayments={data.monthPayments}
+              monthShopSales={data.monthShopSales}
               cashRegisters={data.cashRegisters}
               refetch={data.refetch}
             />
