@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "@/hooks/use-toast";
-import { Plus, CalendarDays, Users, TrendingUp, Activity, Pencil, Trash2, Clock, User, List, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, CalendarDays, Users, TrendingUp, Activity, Pencil, Trash2, Clock, User, List, UserPlus, Check, X } from "lucide-react";
 import GymAiAssistant from "@/components/GymAiAssistant";
 
 const DAYS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
@@ -32,8 +34,19 @@ export default function Clases() {
   const [classes, setClasses] = useState<any[]>([]);
   const [schedules, setSchedules] = useState<any[]>([]);
   const [bookings, setBookings] = useState<any[]>([]);
+  const [eligibleMembers, setEligibleMembers] = useState<any[]>([]);
   const [detailSchedule, setDetailSchedule] = useState<any | null>(null);
   const [slotDialog, setSlotDialog] = useState<{ items: any[]; label: string } | null>(null);
+  const [bookingPickerOpen, setBookingPickerOpen] = useState(false);
+  const [savingBooking, setSavingBooking] = useState(false);
+
+  // Default booking_date = next occurrence of the schedule's day_of_week
+  const nextDateForDay = (dow: number) => {
+    const today = new Date();
+    const diff = (dow - today.getDay() + 7) % 7;
+    const d = new Date(today); d.setDate(today.getDate() + diff);
+    return d.toISOString().slice(0, 10);
+  };
 
   const fetchData = async () => {
     if (!gymId) return;
@@ -44,11 +57,22 @@ export default function Clases() {
       : { data: [] as any[] };
     const scheduleIds = (schedulesRes.data ?? []).map((s: any) => s.id);
     const bookingsRes = scheduleIds.length
-      ? await supabase.from("class_bookings").select("class_schedule_id, status").in("class_schedule_id", scheduleIds)
+      ? await supabase.from("class_bookings").select("id, class_schedule_id, status, booking_date, member_id, members(first_name, last_name)").in("class_schedule_id", scheduleIds)
       : { data: [] as any[] };
+
+    // Eligible members: active status + at least one active subscription
+    const membersRes = await supabase
+      .from("members")
+      .select("id, first_name, last_name, status, cedula, subscriptions!inner(id, status, end_date)")
+      .eq("gym_id", gymId)
+      .eq("status", "active")
+      .eq("subscriptions.status", "active")
+      .gte("subscriptions.end_date", new Date().toISOString().slice(0, 10));
+
     setClasses(classesRes.data ?? []);
     setSchedules(schedulesRes.data ?? []);
     setBookings(bookingsRes.data ?? []);
+    setEligibleMembers(membersRes.data ?? []);
   };
 
   useEffect(() => { fetchData(); }, [gymId]);
@@ -149,6 +173,40 @@ export default function Clases() {
     toast({ title: "Horario eliminado" });
     setDetailSchedule(null);
     setSlotDialog(null);
+    fetchData();
+  };
+
+  const handleBookMember = async (memberId: string) => {
+    if (!detailSchedule) return;
+    const cap = detailSchedule.classes?.max_capacity ?? 0;
+    const bookingDate = nextDateForDay(detailSchedule.day_of_week);
+    const currentActive = bookings.filter(
+      (b) => b.class_schedule_id === detailSchedule.id && b.booking_date === bookingDate && b.status !== "cancelled"
+    );
+    if (currentActive.length >= cap) {
+      return toast({ title: "Cupo lleno", description: "No quedan espacios para esta fecha.", variant: "destructive" });
+    }
+    if (currentActive.some((b) => b.member_id === memberId)) {
+      return toast({ title: "Ya reservado", description: "El socio ya está reservado para esta fecha.", variant: "destructive" });
+    }
+    setSavingBooking(true);
+    const { error } = await supabase.from("class_bookings").insert({
+      class_schedule_id: detailSchedule.id,
+      member_id: memberId,
+      booking_date: bookingDate,
+      status: "booked",
+    });
+    setSavingBooking(false);
+    setBookingPickerOpen(false);
+    if (error) return toast({ title: "Error", description: error.message, variant: "destructive" });
+    toast({ title: "Reserva creada" });
+    fetchData();
+  };
+
+  const handleCancelBooking = async (bookingId: string) => {
+    const { error } = await supabase.from("class_bookings").delete().eq("id", bookingId);
+    if (error) return toast({ title: "Error", description: error.message, variant: "destructive" });
+    toast({ title: "Reserva cancelada" });
     fetchData();
   };
 
@@ -300,15 +358,22 @@ export default function Clases() {
       </Card>
 
       {/* Schedule detail dialog */}
-      <Dialog open={!!detailSchedule} onOpenChange={(o) => !o && setDetailSchedule(null)}>
-        <DialogContent className="max-w-md">
+      <Dialog open={!!detailSchedule} onOpenChange={(o) => { if (!o) { setDetailSchedule(null); setBookingPickerOpen(false); } }}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
           {detailSchedule && (() => {
-            const counts = bookingsBySchedule[detailSchedule.id] ?? { booked: 0, attended: 0, cancelled: 0 };
-            const occupied = counts.booked + counts.attended;
             const cap = detailSchedule.classes?.max_capacity ?? 0;
+            const bookingDate = nextDateForDay(detailSchedule.day_of_week);
+            const dateBookings = bookings.filter(
+              (b) => b.class_schedule_id === detailSchedule.id && b.booking_date === bookingDate && b.status !== "cancelled"
+            );
+            const occupied = dateBookings.length;
             const pct = cap > 0 ? (occupied / cap) * 100 : 0;
             const isFull = occupied >= cap;
             const color = classColorMap[detailSchedule.class_id] ?? CLASS_COLORS[0];
+            const bookedMemberIds = new Set(dateBookings.map((b) => b.member_id));
+            const available = eligibleMembers.filter((m) => !bookedMemberIds.has(m.id));
+            const bookingDateLabel = new Date(bookingDate + "T12:00").toLocaleDateString("es", { weekday: "long", day: "numeric", month: "long" });
+
             return (
               <>
                 <DialogHeader>
@@ -319,6 +384,7 @@ export default function Clases() {
                       <p className="text-xs text-muted-foreground mt-0.5">
                         {DAYS_FULL[detailSchedule.day_of_week]} · {detailSchedule.start_time.slice(0, 5)} – {detailSchedule.end_time.slice(0, 5)}
                       </p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5 capitalize">Próxima sesión: {bookingDateLabel}</p>
                     </div>
                   </div>
                 </DialogHeader>
@@ -346,8 +412,8 @@ export default function Clases() {
 
                   <div className="rounded-lg border border-border/40 p-3">
                     <div className="flex items-center justify-between mb-2">
-                      <p className="text-[10px] uppercase text-muted-foreground font-semibold">Cupo</p>
-                      <p className="text-sm font-display font-bold">
+                      <p className="text-[10px] uppercase text-muted-foreground font-semibold">Cupo (esta sesión)</p>
+                      <p className="text-sm font-display font-bold flex items-center">
                         {occupied} / {cap}
                         {isFull && <Badge variant="destructive" className="ml-2 text-[9px]">Lleno</Badge>}
                       </p>
@@ -358,11 +424,80 @@ export default function Clases() {
                         style={{ width: `${Math.min(pct, 100)}%`, background: color.border }}
                       />
                     </div>
-                    <div className="flex gap-3 mt-2 text-[10px] text-muted-foreground">
-                      <span>📅 {counts.booked} reservadas</span>
-                      <span>✅ {counts.attended} asistieron</span>
-                      {counts.cancelled > 0 && <span>❌ {counts.cancelled} canceladas</span>}
+                  </div>
+
+                  {/* Reservas */}
+                  <div className="rounded-lg border border-border/40 p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] uppercase text-muted-foreground font-semibold">Reservados ({occupied})</p>
+                      <Popover open={bookingPickerOpen} onOpenChange={setBookingPickerOpen}>
+                        <PopoverTrigger asChild>
+                          <Button size="sm" variant="outline" disabled={isFull || savingBooking} className="h-7 text-xs">
+                            <UserPlus className="h-3 w-3 mr-1" />Reservar socio
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-72 p-0" align="end">
+                          <Command>
+                            <CommandInput placeholder="Buscar socio elegible..." className="h-9" />
+                            <CommandList>
+                              <CommandEmpty>
+                                {eligibleMembers.length === 0
+                                  ? "No hay socios activos con plan vigente."
+                                  : "Sin resultados."}
+                              </CommandEmpty>
+                              <CommandGroup>
+                                {available.map((m) => (
+                                  <CommandItem
+                                    key={m.id}
+                                    value={`${m.first_name} ${m.last_name} ${m.cedula}`}
+                                    onSelect={() => handleBookMember(m.id)}
+                                  >
+                                    <Check className="h-3 w-3 mr-2 opacity-0" />
+                                    <div className="min-w-0 flex-1">
+                                      <p className="text-sm truncate">{m.first_name} {m.last_name}</p>
+                                      <p className="text-[10px] text-muted-foreground truncate">{m.cedula}</p>
+                                    </div>
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                          <div className="px-3 py-2 border-t border-border/40 text-[10px] text-muted-foreground">
+                            Solo socios activos con plan vigente
+                          </div>
+                        </PopoverContent>
+                      </Popover>
                     </div>
+
+                    {dateBookings.length === 0 ? (
+                      <p className="text-xs text-muted-foreground text-center py-3">Sin reservas para esta sesión</p>
+                    ) : (
+                      <div className="space-y-1 max-h-40 overflow-y-auto">
+                        {dateBookings.map((b) => (
+                          <div key={b.id} className="flex items-center justify-between gap-2 py-1.5 px-2 rounded bg-muted/30">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                                <User className="h-3 w-3 text-primary" />
+                              </div>
+                              <p className="text-sm truncate">
+                                {b.members?.first_name} {b.members?.last_name}
+                              </p>
+                              {b.status === "attended" && (
+                                <Badge variant="default" className="text-[9px] h-4">Asistió</Badge>
+                              )}
+                            </div>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-6 w-6 text-destructive hover:text-destructive shrink-0"
+                              onClick={() => handleCancelBooking(b.id)}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex gap-2 pt-2">
