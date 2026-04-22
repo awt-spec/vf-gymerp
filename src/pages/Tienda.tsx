@@ -26,6 +26,7 @@ const CATEGORY_ICONS: Record<string, string> = {
 const PAYMENT_METHODS: Record<string, string> = { cash: "💵 Efectivo", card: "💳 Tarjeta", transfer: "🏦 Transfer" };
 
 export default function Tienda() {
+  const { gymId } = useGym();
   const [products, setProducts] = useState<any[]>([]);
   const [sales, setSales] = useState<any[]>([]);
   const [members, setMembers] = useState<any[]>([]);
@@ -39,11 +40,12 @@ export default function Tienda() {
   const [saleForm, setSaleForm] = useState({ product_id: "", member_id: "", quantity: "1", payment_method: "cash" });
 
   const fetchData = async () => {
+    if (!gymId) { setLoading(false); return; }
     setLoading(true);
     const [pRes, sRes, mRes] = await Promise.all([
-      supabase.from("shop_products").select("*").order("name"),
-      supabase.from("shop_sales").select("*, shop_products(name, category), members(first_name, last_name)").order("sale_date", { ascending: false }).limit(100),
-      supabase.from("members").select("id, first_name, last_name, status").eq("status", "active").order("first_name"),
+      supabase.from("shop_products").select("*").eq("gym_id", gymId).order("name"),
+      supabase.from("shop_sales").select("*, shop_products(name, category), members(first_name, last_name)").eq("gym_id", gymId).order("sale_date", { ascending: false }).limit(100),
+      supabase.from("members").select("id, first_name, last_name, status").eq("gym_id", gymId).eq("status", "active").order("first_name"),
     ]);
     setProducts(pRes.data ?? []);
     setSales(sRes.data ?? []);
@@ -51,11 +53,12 @@ export default function Tienda() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [gymId]);
 
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = { name: form.name, category: form.category, price: Number(form.price), stock: Number(form.stock), min_stock: Number(form.min_stock) };
+    if (!gymId) { toast({ title: "Sin gimnasio activo", variant: "destructive" }); return; }
+    const payload = { name: form.name, category: form.category, price: Number(form.price), stock: Number(form.stock), min_stock: Number(form.min_stock), gym_id: gymId };
     let error;
     if (editProduct) {
       ({ error } = await supabase.from("shop_products").update(payload).eq("id", editProduct.id));
@@ -77,6 +80,7 @@ export default function Tienda() {
 
   const handleSale = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!gymId) { toast({ title: "Sin gimnasio activo", variant: "destructive" }); return; }
     const product = products.find(p => p.id === saleForm.product_id);
     if (!product) return;
     const qty = Number(saleForm.quantity);
@@ -86,7 +90,8 @@ export default function Tienda() {
       product_id: saleForm.product_id,
       member_id: saleForm.member_id && saleForm.member_id !== "none" ? saleForm.member_id : null,
       quantity: qty, unit_price: product.price, total_amount: product.price * qty,
-      payment_method: saleForm.payment_method, sold_by: userId,
+      payment_method: saleForm.payment_method, sold_by: userId!,
+      gym_id: gymId,
     });
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
     await supabase.from("shop_products").update({ stock: product.stock - qty }).eq("id", product.id);
