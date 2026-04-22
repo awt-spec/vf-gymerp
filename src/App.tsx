@@ -36,6 +36,8 @@ import RootLanding from "./pages/RootLanding";
 import GymSelect from "./pages/GymSelect";
 import SetupWizard from "./pages/SetupWizard";
 import Usuarios from "./pages/Usuarios";
+import UsuarioNuevo from "./pages/UsuarioNuevo";
+import UsuariosImportar from "./pages/UsuariosImportar";
 import CierresCaja from "./pages/CierresCaja";
 import ResetPassword from "./pages/ResetPassword";
 
@@ -100,6 +102,8 @@ const App = () => (
                   <Route path="/perfil" element={<Perfil />} />
                   <Route path="/mi-gym" element={<MiGym />} />
                   <Route path="/usuarios" element={<Usuarios />} />
+                  <Route path="/usuarios/nuevo" element={<UsuarioNuevo />} />
+                  <Route path="/usuarios/importar" element={<UsuariosImportar />} />
                   <Route path="/cierres-caja" element={<CierresCaja />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
