@@ -321,21 +321,13 @@ export default function RootLanding() {
           )}
         </div>
 
-        <div className="mt-6 text-center space-y-2">
+        <div className="mt-6 text-center">
           <button
             onClick={() => navigate("/register-gym")}
             className="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
           >
             Registrar nuevo gimnasio →
           </button>
-          <div>
-            <button
-              onClick={() => navigate("/gym-select")}
-              className="text-[11px] text-slate-400 hover:text-slate-600 transition-colors"
-            >
-              ¿Sos socio? Buscá tu gimnasio
-            </button>
-          </div>
         </div>
       </motion.div>
     </div>
