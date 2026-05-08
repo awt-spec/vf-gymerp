@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Users, CreditCard, ScanLine, CalendarDays, LogOut,
-  Dumbbell, Apple, Package, Receipt, HandCoins, TrendingUp, UserCircle, Home, BarChart3, Wallet, Megaphone, ShoppingBag, UserCog, Vault
+  Dumbbell, Apple, Package, Receipt, HandCoins, TrendingUp, UserCircle, Home, BarChart3, Wallet, Megaphone, ShoppingBag, UserCog, Vault, Activity
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";
@@ -54,6 +54,7 @@ const memberItems = [
   { title: "Entrenamiento", url: "/mi-gym/ejercicios", icon: Dumbbell },
   { title: "Nutrición", url: "/mi-gym/nutricion", icon: Apple },
   { title: "Clases", url: "/mi-gym/clases", icon: CalendarDays },
+  { title: "Datos Corporales", url: "/mi-gym/datos-corporales", icon: Activity },
   { title: "Mi Plan", url: "/mi-gym/plan", icon: CreditCard },
 ];
 

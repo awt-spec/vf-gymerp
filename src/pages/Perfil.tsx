@@ -212,47 +212,7 @@ export default function Perfil() {
             </CardContent>
           </Card>
 
-          {/* Composición Corporal InBody */}
-          {inbodyData ? (
-            <Card className="border-cyan-500/30 bg-cyan-500/5">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-cyan-400" /> Composición Corporal (InBody)
-                </CardTitle>
-                <p className="text-xs text-muted-foreground">
-                  Medición: {format(new Date(inbodyData.measurement_date), "dd 'de' MMMM yyyy", { locale: es })}
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { label: "Peso", value: inbodyData.weight_kg ? `${inbodyData.weight_kg} kg` : null, emoji: "⚖️" },
-                    { label: "Masa Muscular", value: inbodyData.muscle_mass_kg ? `${inbodyData.muscle_mass_kg} kg` : null, emoji: "💪" },
-                    { label: "% Grasa Corporal", value: inbodyData.body_fat_pct ? `${inbodyData.body_fat_pct}%` : null, emoji: "📊" },
-                    { label: "Grasa Visceral", value: inbodyData.visceral_fat_level ? `Nivel ${inbodyData.visceral_fat_level}` : null, emoji: "🫀" },
-                    { label: "IMC", value: inbodyData.bmi ? Number(inbodyData.bmi).toFixed(1) : null, emoji: "📏" },
-                    { label: "Edad Metabólica", value: inbodyData.metabolic_age ? `${inbodyData.metabolic_age} años` : null, emoji: "⚡" },
-                  ].map(({ label, value, emoji }) => (
-                    <div key={label} className="rounded-lg border border-border/50 bg-background/50 p-2">
-                      <p className="text-[10px] text-muted-foreground">{emoji} {label}</p>
-                      <p className="text-sm font-semibold text-foreground">{value || "—"}</p>
-                    </div>
-                  ))}
-                </div>
-                {inbodyData.notes && (
-                  <p className="text-xs text-muted-foreground italic border-t border-border/50 pt-2">{inbodyData.notes}</p>
-                )}
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="border-border/50">
-              <CardContent className="pt-6 pb-6 text-center space-y-1">
-                <Activity className="w-8 h-8 text-muted-foreground/50 mx-auto" />
-                <p className="text-sm font-medium text-foreground">Sin datos de composición corporal</p>
-                <p className="text-xs text-muted-foreground">Solicita tu medición InBody en recepción</p>
-              </CardContent>
-            </Card>
-          )}
+          {/* Composición Corporal: ahora en página dedicada /mi-gym/datos-corporales */}
         </>
       )}
     </div>
