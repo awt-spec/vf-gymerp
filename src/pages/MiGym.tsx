@@ -744,8 +744,8 @@ export default function MiGym({ tab }: { tab?: MiGymTab } = {}) {
                   )}
                   <button
                     onClick={() => setPreviewVideoUrl((exercise as any).video_url || exercise.name)}
-                    className="inline-flex items-center gap-1 text-sm text-red-400 hover:text-red-300 bg-red-500/10 px-3 py-1.5 rounded-full mt-1">
-                    <Youtube className="w-4 h-4" /> Ver cómo se hace
+                    className="inline-flex items-center gap-2 text-base font-semibold text-white bg-red-600 hover:bg-red-700 px-5 py-2.5 rounded-full mt-2 shadow-lg shadow-red-600/30 transition-all active:scale-95">
+                    <Youtube className="w-5 h-5" /> Ver video
                   </button>
                 </div>
 
@@ -1442,9 +1442,9 @@ export default function MiGym({ tab }: { tab?: MiGymTab } = {}) {
                     </div>
                     <button
                       onClick={() => setPreviewVideoUrl((ex as any).video_url || ex.name)}
-                      className="flex items-center gap-1 text-[10px] text-red-400 bg-red-500/10 px-2 py-1.5 rounded-lg hover:bg-red-500/20 shrink-0 transition-colors"
+                      className="flex items-center gap-1.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 px-3 py-2 rounded-lg shrink-0 transition-all active:scale-95 shadow-md shadow-red-600/30"
                     >
-                      <Youtube className="w-3.5 h-3.5" /> Ver
+                      <Youtube className="w-4 h-4" /> Video
                     </button>
                   </CardContent>
                 </Card>
