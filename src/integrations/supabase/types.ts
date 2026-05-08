@@ -999,6 +999,74 @@ export type Database = {
         }
         Relationships: []
       }
+      inbody_results: {
+        Row: {
+          bmi: number | null
+          bmr_kcal: number | null
+          body_fat_mass_kg: number | null
+          body_fat_pct: number | null
+          body_water_kg: number | null
+          bone_mass_kg: number | null
+          created_at: string
+          created_by: string | null
+          id: string
+          measurement_date: string
+          member_id: string
+          metabolic_age: number | null
+          muscle_mass_kg: number | null
+          notes: string | null
+          updated_at: string
+          visceral_fat_level: number | null
+          weight_kg: number | null
+        }
+        Insert: {
+          bmi?: number | null
+          bmr_kcal?: number | null
+          body_fat_mass_kg?: number | null
+          body_fat_pct?: number | null
+          body_water_kg?: number | null
+          bone_mass_kg?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          measurement_date?: string
+          member_id: string
+          metabolic_age?: number | null
+          muscle_mass_kg?: number | null
+          notes?: string | null
+          updated_at?: string
+          visceral_fat_level?: number | null
+          weight_kg?: number | null
+        }
+        Update: {
+          bmi?: number | null
+          bmr_kcal?: number | null
+          body_fat_mass_kg?: number | null
+          body_fat_pct?: number | null
+          body_water_kg?: number | null
+          bone_mass_kg?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          measurement_date?: string
+          member_id?: string
+          metabolic_age?: number | null
+          muscle_mass_kg?: number | null
+          notes?: string | null
+          updated_at?: string
+          visceral_fat_level?: number | null
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inbody_results_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inventory: {
         Row: {
           category: string
