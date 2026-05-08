@@ -254,6 +254,30 @@ export default function SocioDetalle() {
         <CardContent className="space-y-4">
           {showInbodyForm && (
             <div className="space-y-3 p-3 rounded-lg border border-border/50 bg-muted/20">
+              {/* Subida de archivo InBody con parseo IA */}
+              <div className="rounded-lg border border-dashed border-cyan-500/40 bg-cyan-500/5 p-3">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="flex items-center gap-2 text-xs">
+                    <Upload className="h-4 w-4 text-cyan-400" />
+                    <span className="font-medium text-foreground">Cargar PDF o XML del InBody</span>
+                  </div>
+                  {parsing && <Loader2 className="h-4 w-4 animate-spin text-cyan-400" />}
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-1">La IA extrae los valores automáticamente. Podés revisarlos abajo antes de guardar.</p>
+                <Input
+                  type="file"
+                  accept="application/pdf,text/xml,application/xml,image/*,.xml,.pdf"
+                  disabled={parsing}
+                  className="mt-2 text-xs"
+                  onChange={e => { const f = e.target.files?.[0]; if (f) handleFileUpload(f); }}
+                />
+                {inbodyForm.file_url && (
+                  <p className="text-[10px] text-primary mt-2 flex items-center gap-1">
+                    <FileText className="h-3 w-3" /> Archivo adjunto listo para guardar
+                  </p>
+                )}
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1 col-span-2">
                   <Label className="text-xs">Fecha</Label>
@@ -296,7 +320,7 @@ export default function SocioDetalle() {
                     onChange={e => setInbodyForm(f => ({ ...f, notes: e.target.value }))} />
                 </div>
               </div>
-              <Button onClick={saveInbody} disabled={savingInbody} className="w-full">
+              <Button onClick={saveInbody} disabled={savingInbody || parsing} className="w-full">
                 {savingInbody ? "Guardando..." : "Guardar medición"}
               </Button>
             </div>
@@ -310,11 +334,34 @@ export default function SocioDetalle() {
                 Historial ({inbodyList.length})
               </p>
               {inbodyList.map((row) => (
-                <div key={row.id} className="rounded-lg border border-border/50 p-3 text-xs space-y-1">
-                  <div className="flex items-center justify-between">
+                <div key={row.id} className="rounded-lg border border-border/50 p-3 text-xs space-y-2">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
                     <span className="font-semibold text-foreground">
                       {new Date(row.measurement_date).toLocaleDateString("es-CR", { day: "2-digit", month: "short", year: "numeric" })}
                     </span>
+                    <div className="flex items-center gap-1 flex-wrap">
+                      {row.file_url && (
+                        <Badge variant="outline" className="text-[10px]">
+                          <FileText className="h-3 w-3 mr-1" />Archivo
+                        </Badge>
+                      )}
+                      {row.email_sent ? (
+                        <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px]">
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                          Email enviado {row.email_sent_at ? new Date(row.email_sent_at).toLocaleDateString() : ""}
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-[10px] text-muted-foreground">Email no enviado</Badge>
+                      )}
+                      <Button
+                        size="sm" variant="ghost" className="h-6 px-2 text-[10px]"
+                        disabled={sendingEmailId === row.id || !member?.email}
+                        title={member?.email ? "Enviar al email del consumidor" : "El consumidor no tiene email"}
+                        onClick={() => sendInbodyEmail(row.id)}
+                      >
+                        {sendingEmailId === row.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Send className="h-3 w-3 mr-1" />{row.email_sent ? "Reenviar" : "Enviar"}</>}
+                      </Button>
+                    </div>
                   </div>
                   <div className="grid grid-cols-3 gap-2 text-[11px] text-muted-foreground">
                     {row.weight_kg != null && <span>⚖️ {row.weight_kg} kg</span>}
@@ -331,6 +378,9 @@ export default function SocioDetalle() {
           )}
         </CardContent>
       </Card>
+
+      {/* Citas con coach */}
+      <AppointmentsPanel memberId={member.id} gymId={gymId} />
 
       {member.notes && member.status !== "suspended" && (
         <Card>
