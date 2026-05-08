@@ -34,6 +34,7 @@ import MiGymEjercicios from "./pages/MiGymEjercicios";
 import MiGymNutricion from "./pages/MiGymNutricion";
 import MiGymClases from "./pages/MiGymClases";
 import MiGymPlan from "./pages/MiGymPlan";
+import MiGymDatosCorporales from "./pages/MiGymDatosCorporales";
 
 import ErpDashboard from "./pages/ErpDashboard";
 import RegisterGym from "./pages/RegisterGym";
@@ -125,6 +126,7 @@ const App = () => (
                   <Route path="/mi-gym/nutricion" element={<MiGymNutricion />} />
                   <Route path="/mi-gym/clases" element={<MiGymClases />} />
                   <Route path="/mi-gym/plan" element={<MiGymPlan />} />
+                  <Route path="/mi-gym/datos-corporales" element={<MiGymDatosCorporales />} />
                   <Route path="/usuarios" element={<Usuarios />} />
                   <Route path="/usuarios/nuevo" element={<UsuarioNuevo />} />
                   <Route path="/usuarios/importar" element={<UsuariosImportar />} />
