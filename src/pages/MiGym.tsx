@@ -897,7 +897,9 @@ export default function MiGym() {
               )}
               {Object.entries(splitGroups).map(([splitType, plans]) => (
                 <div key={splitType} className="space-y-1.5">
-                  <p className="text-xs font-medium text-muted-foreground">{SPLIT_LABELS[splitType] || splitType}</p>
+                  <p className="text-xs font-medium text-muted-foreground">
+                    {WORKOUT_CATEGORIES[splitType]?.emoji} {WORKOUT_CATEGORIES[splitType]?.label || SPLIT_LABELS[splitType] || splitType}
+                  </p>
                   {plans.map(plan => (
                     <Card key={plan.id} className="border-border/50 cursor-pointer hover:border-primary/40 active:scale-[0.98] transition-all" onClick={() => setPreviewPlan(plan)}>
                       <CardContent className="py-3 flex items-center gap-3">
