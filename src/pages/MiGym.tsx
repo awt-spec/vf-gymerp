@@ -732,10 +732,11 @@ export default function MiGym() {
                   {exercise.machine && (
                     <p className="text-sm text-muted-foreground">📍 {exercise.machine}</p>
                   )}
-                  <a href={youtubeSearchUrl(exercise.name)} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-red-400 hover:text-red-300">
-                    <Youtube className="w-3.5 h-3.5" /> ¿Cómo se hace?
-                  </a>
+                  <button
+                    onClick={() => setPreviewVideoUrl((exercise as any).video_url || exercise.name)}
+                    className="inline-flex items-center gap-1 text-sm text-red-400 hover:text-red-300 bg-red-500/10 px-3 py-1.5 rounded-full mt-1">
+                    <Youtube className="w-4 h-4" /> Ver cómo se hace
+                  </button>
                 </div>
 
                 {/* Set indicators */}
