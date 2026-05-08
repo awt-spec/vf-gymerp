@@ -52,6 +52,7 @@ import SocioEditar from "./pages/SocioEditar";
 import SociosImportar from "./pages/SociosImportar";
 import CierresCaja from "./pages/CierresCaja";
 import ResetPassword from "./pages/ResetPassword";
+import RecepcionDashboard from "./pages/RecepcionDashboard";
 
 const queryClient = new QueryClient();
 
