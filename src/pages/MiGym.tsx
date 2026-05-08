@@ -333,8 +333,10 @@ export default function MiGym({ tab }: { tab?: MiGymTab } = {}) {
   } : null;
 
   // ── Session management ──
+  const navigate = useNavigate();
   const startSession = (plan: any) => {
     setSessionPlan(plan); setCompletedExercises([]); setSessionDone(false); startExercise(plan, 0);
+    if (tab !== "ejercicios") navigate("/mi-gym/ejercicios");
   };
 
   const startExercise = (plan: any, exIdx: number) => {
