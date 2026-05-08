@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -332,8 +333,10 @@ export default function MiGym({ tab }: { tab?: MiGymTab } = {}) {
   } : null;
 
   // ── Session management ──
+  const navigate = useNavigate();
   const startSession = (plan: any) => {
     setSessionPlan(plan); setCompletedExercises([]); setSessionDone(false); startExercise(plan, 0);
+    if (tab !== "ejercicios") navigate("/mi-gym/ejercicios");
   };
 
   const startExercise = (plan: any, exIdx: number) => {
