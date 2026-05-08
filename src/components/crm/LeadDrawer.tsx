@@ -92,7 +92,7 @@ export function LeadDrawer({ leadId, onClose, onChanged }: Props) {
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
     await supabase.from("leads").update({
       status: "convertido",
-      converted_member_id: member.id,
+      converted_to_member_id: member.id,
     }).eq("id", lead.id);
     toast({ title: "Lead convertido a socio 🎉" });
     onChanged();
