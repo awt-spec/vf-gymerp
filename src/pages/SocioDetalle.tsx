@@ -44,8 +44,11 @@ export default function SocioDetalle() {
   const [inbodyForm, setInbodyForm] = useState({
     measurement_date: new Date().toISOString().split("T")[0],
     weight_kg: "", muscle_mass_kg: "", body_fat_pct: "",
-    visceral_fat_level: "", bmi: "", metabolic_age: "", notes: ""
+    visceral_fat_level: "", bmi: "", metabolic_age: "", notes: "",
+    file_url: "" as string | null, file_type: "" as string | null,
   });
+  const [parsing, setParsing] = useState(false);
+  const [sendingEmailId, setSendingEmailId] = useState<string | null>(null);
 
   const refreshInbody = async () => {
     if (!id) return;
