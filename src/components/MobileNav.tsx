@@ -116,6 +116,7 @@ export function FullNavItems() {
       { title: "Entrenamiento", url: "/mi-gym/ejercicios", icon: Dumbbell },
       { title: "Nutrición", url: "/mi-gym/nutricion", icon: Apple },
       { title: "Clases", url: "/mi-gym/clases", icon: CalendarDays },
+      { title: "Datos Corporales", url: "/mi-gym/datos-corporales", icon: Activity },
       { title: "Mi Plan", url: "/mi-gym/plan", icon: CreditCard },
     ];
   } else {
