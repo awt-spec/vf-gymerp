@@ -1362,6 +1362,30 @@ export default function MiGym() {
         onClose={() => setScannerOpen(false)}
         onConfirm={handleScannedFood}
       />
+
+      {previewVideoUrl && (
+        <div
+          className="fixed inset-0 z-[200] bg-black/80 flex items-center justify-center p-4"
+          onClick={() => setPreviewVideoUrl(null)}
+        >
+          <div className="relative w-full max-w-lg" onClick={e => e.stopPropagation()}>
+            <button
+              onClick={() => setPreviewVideoUrl(null)}
+              className="absolute -top-10 right-0 text-white/80 hover:text-white flex items-center gap-1 text-sm">
+              <X className="w-5 h-5" /> Cerrar
+            </button>
+            <div className="aspect-video w-full rounded-2xl overflow-hidden bg-black">
+              <iframe
+                src={getYoutubeEmbedUrl(previewVideoUrl)}
+                className="w-full h-full"
+                allowFullScreen
+                allow="autoplay; encrypted-media"
+                title="Tutorial de ejercicio"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
