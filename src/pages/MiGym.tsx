@@ -134,6 +134,17 @@ function DateStrip({ selectedDate, onChange }: { selectedDate: Date; onChange: (
 }
 
 type PlanExercise = { name: string; sets: string; reps: string; rest: string; machine?: string };
+
+const WORKOUT_CATEGORIES: Record<string, { label: string; emoji: string; description: string }> = {
+  push_pull_legs: { label: "Pesas — PPL", emoji: "🏋️", description: "Rutina de empuje, jalón y piernas" },
+  upper_lower: { label: "Pesas — Upper/Lower", emoji: "💪", description: "Tren superior e inferior" },
+  full_body: { label: "Full Body", emoji: "⚡", description: "Entrenamiento de cuerpo completo" },
+  bro_split: { label: "Pesas — Bro Split", emoji: "🔥", description: "Split clásico por grupo muscular" },
+  gap: { label: "GAP", emoji: "🧘", description: "Glúteos, Abdomen y Piernas" },
+  funcional: { label: "Funcional", emoji: "🤸", description: "Entrenamiento funcional" },
+  cardio: { label: "Cardio", emoji: "🏃", description: "Entrenamiento cardiovascular" },
+  custom: { label: "Personalizado", emoji: "🎯", description: "Rutina personalizada por tu coach" },
+};
 type SetData = { reps: string; weight: string; effort: number; done: boolean };
 type ExerciseSession = {
   exercise: PlanExercise; exIdx: number; totalSets: number;
@@ -198,6 +209,7 @@ export default function MiGym() {
   const [scannerOpen, setScannerOpen] = useState(false);
 
   const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null);
+  const [previewPlan, setPreviewPlan] = useState<any>(null);
 
   const [nutritionGoals, setNutritionGoals] = useState(() => {
     try {
@@ -885,9 +897,11 @@ export default function MiGym() {
               )}
               {Object.entries(splitGroups).map(([splitType, plans]) => (
                 <div key={splitType} className="space-y-1.5">
-                  <p className="text-xs font-medium text-muted-foreground">{SPLIT_LABELS[splitType] || splitType}</p>
+                  <p className="text-xs font-medium text-muted-foreground">
+                    {WORKOUT_CATEGORIES[splitType]?.emoji} {WORKOUT_CATEGORIES[splitType]?.label || SPLIT_LABELS[splitType] || splitType}
+                  </p>
                   {plans.map(plan => (
-                    <Card key={plan.id} className="border-border/50 cursor-pointer hover:border-primary/40 active:scale-[0.98] transition-all" onClick={() => startSession(plan)}>
+                    <Card key={plan.id} className="border-border/50 cursor-pointer hover:border-primary/40 active:scale-[0.98] transition-all" onClick={() => setPreviewPlan(plan)}>
                       <CardContent className="py-3 flex items-center gap-3">
                         <Dumbbell className="w-4 h-4 text-primary shrink-0" />
                         <div className="flex-1 min-w-0">
@@ -1383,6 +1397,69 @@ export default function MiGym() {
                 title="Tutorial de ejercicio"
               />
             </div>
+          </div>
+        </div>
+      )}
+
+      {previewPlan && (
+        <div className="fixed inset-0 z-[150] bg-background/98 backdrop-blur-sm overflow-y-auto">
+          <div className="max-w-lg mx-auto p-4 space-y-4 pb-10">
+            <div className="flex items-center justify-between pt-3">
+              <div>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                  {WORKOUT_CATEGORIES[previewPlan.split_type]?.emoji}{" "}
+                  {WORKOUT_CATEGORIES[previewPlan.split_type]?.label || previewPlan.split_type}
+                </p>
+                <h2 className="text-xl font-display font-bold text-foreground mt-0.5">{previewPlan.title}</h2>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setPreviewPlan(null)}>
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+
+            {previewPlan.day_label && (
+              <Badge variant="outline" className="bg-primary/10">{previewPlan.day_label}</Badge>
+            )}
+            {previewPlan.description && (
+              <p className="text-sm text-muted-foreground">{previewPlan.description}</p>
+            )}
+
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                {(previewPlan.exercises as PlanExercise[])?.length} ejercicios
+              </p>
+              {(previewPlan.exercises as PlanExercise[])?.map((ex, i) => (
+                <Card key={i} className="border-border/50">
+                  <CardContent className="py-3 flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 text-sm font-bold text-primary">
+                      {i + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-foreground">{ex.name}</p>
+                      <div className="flex gap-2 mt-0.5 flex-wrap">
+                        <Badge variant="secondary" className="text-[9px] font-mono">{ex.sets}×{ex.reps}</Badge>
+                        {ex.rest && <span className="text-[10px] text-muted-foreground">⏱ {ex.rest}</span>}
+                        {ex.machine && <span className="text-[10px] text-muted-foreground truncate">📍 {ex.machine}</span>}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setPreviewVideoUrl((ex as any).video_url || ex.name)}
+                      className="flex items-center gap-1 text-[10px] text-red-400 bg-red-500/10 px-2 py-1.5 rounded-lg hover:bg-red-500/20 shrink-0 transition-colors"
+                    >
+                      <Youtube className="w-3.5 h-3.5" /> Ver
+                    </button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <Button
+              size="lg"
+              className="w-full gap-2 rounded-xl text-base h-14 sticky bottom-4"
+              onClick={() => { startSession(previewPlan); setPreviewPlan(null); }}
+            >
+              <Play className="w-5 h-5" /> Comenzar entrenamiento
+            </Button>
           </div>
         </div>
       )}
