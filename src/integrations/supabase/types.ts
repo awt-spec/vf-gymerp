@@ -468,6 +468,77 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_logs: {
+        Row: {
+          channel: string
+          created_at: string | null
+          created_by: string | null
+          direction: string | null
+          follow_up_date: string | null
+          follow_up_done: boolean | null
+          gym_id: string
+          id: string
+          lead_id: string | null
+          member_id: string | null
+          notes: string
+        }
+        Insert: {
+          channel?: string
+          created_at?: string | null
+          created_by?: string | null
+          direction?: string | null
+          follow_up_date?: string | null
+          follow_up_done?: boolean | null
+          gym_id: string
+          id?: string
+          lead_id?: string | null
+          member_id?: string | null
+          notes: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string | null
+          created_by?: string | null
+          direction?: string | null
+          follow_up_date?: string | null
+          follow_up_done?: boolean | null
+          gym_id?: string
+          id?: string
+          lead_id?: string | null
+          member_id?: string | null
+          notes?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_logs_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_logs_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_logs_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_logs_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_campaigns: {
         Row: {
           channel: string
@@ -1245,56 +1316,68 @@ export type Database = {
       leads: {
         Row: {
           assigned_to: string | null
-          converted_member_id: string | null
+          converted_to_member_id: string | null
           created_at: string
+          created_by: string | null
           email: string | null
           first_name: string
           gym_id: string | null
           id: string
+          interest: string | null
           last_contact_at: string | null
           last_name: string | null
           notes: string | null
           phone: string | null
           source: string | null
           status: string
+          trial_class_date: string | null
+          trial_class_id: string | null
           updated_at: string
         }
         Insert: {
           assigned_to?: string | null
-          converted_member_id?: string | null
+          converted_to_member_id?: string | null
           created_at?: string
+          created_by?: string | null
           email?: string | null
           first_name: string
           gym_id?: string | null
           id?: string
+          interest?: string | null
           last_contact_at?: string | null
           last_name?: string | null
           notes?: string | null
           phone?: string | null
           source?: string | null
           status?: string
+          trial_class_date?: string | null
+          trial_class_id?: string | null
           updated_at?: string
         }
         Update: {
           assigned_to?: string | null
-          converted_member_id?: string | null
+          converted_to_member_id?: string | null
           created_at?: string
+          created_by?: string | null
           email?: string | null
           first_name?: string
           gym_id?: string | null
           id?: string
+          interest?: string | null
           last_contact_at?: string | null
           last_name?: string | null
           notes?: string | null
           phone?: string | null
           source?: string | null
           status?: string
+          trial_class_date?: string | null
+          trial_class_id?: string | null
           updated_at?: string
         }
         Relationships: [
           {
             foreignKeyName: "leads_converted_member_id_fkey"
-            columns: ["converted_member_id"]
+            columns: ["converted_to_member_id"]
             isOneToOne: false
             referencedRelation: "members"
             referencedColumns: ["id"]
@@ -1311,6 +1394,13 @@ export type Database = {
             columns: ["gym_id"]
             isOneToOne: false
             referencedRelation: "gyms_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_trial_class_id_fkey"
+            columns: ["trial_class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
             referencedColumns: ["id"]
           },
         ]
