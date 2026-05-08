@@ -52,6 +52,7 @@ import SocioEditar from "./pages/SocioEditar";
 import SociosImportar from "./pages/SociosImportar";
 import CierresCaja from "./pages/CierresCaja";
 import ResetPassword from "./pages/ResetPassword";
+import RecepcionDashboard from "./pages/RecepcionDashboard";
 
 const queryClient = new QueryClient();
 
@@ -95,6 +96,7 @@ const App = () => (
                   }
                 >
                   <Route path="/dashboard" element={<Index />} />
+                  <Route path="/recepcion" element={<RecepcionDashboard />} />
                   <Route path="/socios" element={<Socios />} />
                   <Route path="/socios/nuevo" element={<SocioNuevo />} />
                   <Route path="/socios/importar" element={<SociosImportar />} />
