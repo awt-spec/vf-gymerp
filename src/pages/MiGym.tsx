@@ -198,6 +198,7 @@ export default function MiGym() {
   const [scannerOpen, setScannerOpen] = useState(false);
 
   const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null);
+  const [previewPlan, setPreviewPlan] = useState<any>(null);
 
   const [nutritionGoals, setNutritionGoals] = useState(() => {
     try {
