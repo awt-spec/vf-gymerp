@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Users, CreditCard, ScanLine, CalendarDays,
-  Dumbbell, Apple, Package, Receipt, HandCoins, LogOut, TrendingUp, UserCircle, Home, BarChart3, Wallet, Megaphone, ShoppingBag
+  Dumbbell, Apple, Package, Receipt, HandCoins, LogOut, TrendingUp, UserCircle, Home, BarChart3, Wallet, Megaphone, ShoppingBag, Activity
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate, useLocation } from "react-router-dom";
