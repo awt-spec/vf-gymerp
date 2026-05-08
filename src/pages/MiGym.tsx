@@ -169,7 +169,9 @@ function parseRestSeconds(rest: string): number {
   return n;
 }
 
-export default function MiGym() {
+type MiGymTab = "inicio" | "ejercicios" | "nutricion" | "clases" | "pagos";
+
+export default function MiGym({ tab }: { tab?: MiGymTab } = {}) {
   const { user } = useAuth();
   const [memberId, setMemberId] = useState<string | null>(null);
   const [memberName, setMemberName] = useState("");
