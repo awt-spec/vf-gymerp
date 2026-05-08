@@ -899,7 +899,7 @@ export default function MiGym() {
                 <div key={splitType} className="space-y-1.5">
                   <p className="text-xs font-medium text-muted-foreground">{SPLIT_LABELS[splitType] || splitType}</p>
                   {plans.map(plan => (
-                    <Card key={plan.id} className="border-border/50 cursor-pointer hover:border-primary/40 active:scale-[0.98] transition-all" onClick={() => startSession(plan)}>
+                    <Card key={plan.id} className="border-border/50 cursor-pointer hover:border-primary/40 active:scale-[0.98] transition-all" onClick={() => setPreviewPlan(plan)}>
                       <CardContent className="py-3 flex items-center gap-3">
                         <Dumbbell className="w-4 h-4 text-primary shrink-0" />
                         <div className="flex-1 min-w-0">
