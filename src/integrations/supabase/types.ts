@@ -423,6 +423,51 @@ export type Database = {
           },
         ]
       }
+      coach_appointments: {
+        Row: {
+          appointment_type: string | null
+          coach_id: string
+          confirmed_at: string | null
+          created_at: string
+          duration_minutes: number
+          gym_id: string | null
+          id: string
+          member_id: string
+          notes: string | null
+          scheduled_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          appointment_type?: string | null
+          coach_id: string
+          confirmed_at?: string | null
+          created_at?: string
+          duration_minutes?: number
+          gym_id?: string | null
+          id?: string
+          member_id: string
+          notes?: string | null
+          scheduled_at: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          appointment_type?: string | null
+          coach_id?: string
+          confirmed_at?: string | null
+          created_at?: string
+          duration_minutes?: number
+          gym_id?: string | null
+          id?: string
+          member_id?: string
+          notes?: string | null
+          scheduled_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       crm_campaigns: {
         Row: {
           channel: string
@@ -1012,6 +1057,10 @@ export type Database = {
           bone_mass_kg: number | null
           created_at: string
           created_by: string | null
+          email_sent: boolean
+          email_sent_at: string | null
+          file_type: string | null
+          file_url: string | null
           gym_id: string | null
           id: string
           measurement_date: string
@@ -1032,6 +1081,10 @@ export type Database = {
           bone_mass_kg?: number | null
           created_at?: string
           created_by?: string | null
+          email_sent?: boolean
+          email_sent_at?: string | null
+          file_type?: string | null
+          file_url?: string | null
           gym_id?: string | null
           id?: string
           measurement_date?: string
@@ -1052,6 +1105,10 @@ export type Database = {
           bone_mass_kg?: number | null
           created_at?: string
           created_by?: string | null
+          email_sent?: boolean
+          email_sent_at?: string | null
+          file_type?: string | null
+          file_url?: string | null
           gym_id?: string | null
           id?: string
           measurement_date?: string
