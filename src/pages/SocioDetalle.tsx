@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { ArrowLeft, Mail, Phone, IdCard, Calendar, Pencil, AlertTriangle, User, Activity, Plus, X } from "lucide-react";
+import { ArrowLeft, Mail, Phone, IdCard, Calendar, Pencil, AlertTriangle, User, Activity, Plus, X, Upload, Send, Loader2, CheckCircle2, FileText } from "lucide-react";
+import AppointmentsPanel from "@/components/AppointmentsPanel";
 
 type Member = {
   id: string;
