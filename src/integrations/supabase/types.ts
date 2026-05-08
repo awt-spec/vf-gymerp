@@ -537,6 +537,7 @@ export type Database = {
       }
       exercise_plans: {
         Row: {
+          category: string | null
           coach_id: string
           created_at: string
           day_label: string | null
@@ -553,6 +554,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          category?: string | null
           coach_id: string
           created_at?: string
           day_label?: string | null
@@ -569,6 +571,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          category?: string | null
           coach_id?: string
           created_at?: string
           day_label?: string | null
@@ -1009,6 +1012,7 @@ export type Database = {
           bone_mass_kg: number | null
           created_at: string
           created_by: string | null
+          gym_id: string | null
           id: string
           measurement_date: string
           member_id: string
@@ -1028,6 +1032,7 @@ export type Database = {
           bone_mass_kg?: number | null
           created_at?: string
           created_by?: string | null
+          gym_id?: string | null
           id?: string
           measurement_date?: string
           member_id: string
@@ -1047,6 +1052,7 @@ export type Database = {
           bone_mass_kg?: number | null
           created_at?: string
           created_by?: string | null
+          gym_id?: string | null
           id?: string
           measurement_date?: string
           member_id?: string
@@ -1058,6 +1064,20 @@ export type Database = {
           weight_kg?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "inbody_results_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbody_results_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms_public"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "inbody_results_member_id_fkey"
             columns: ["member_id"]
