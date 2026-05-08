@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { ArrowLeft, Mail, Phone, IdCard, Calendar, Pencil, AlertTriangle, User, Activity, Plus, X } from "lucide-react";
+import { ArrowLeft, Mail, Phone, IdCard, Calendar, Pencil, AlertTriangle, User, Activity, Plus, X, Upload, Send, Loader2, CheckCircle2, FileText } from "lucide-react";
+import AppointmentsPanel from "@/components/AppointmentsPanel";
 
 type Member = {
   id: string;
@@ -43,8 +44,11 @@ export default function SocioDetalle() {
   const [inbodyForm, setInbodyForm] = useState({
     measurement_date: new Date().toISOString().split("T")[0],
     weight_kg: "", muscle_mass_kg: "", body_fat_pct: "",
-    visceral_fat_level: "", bmi: "", metabolic_age: "", notes: ""
+    visceral_fat_level: "", bmi: "", metabolic_age: "", notes: "",
+    file_url: "" as string | null, file_type: "" as string | null,
   });
+  const [parsing, setParsing] = useState(false);
+  const [sendingEmailId, setSendingEmailId] = useState<string | null>(null);
 
   const refreshInbody = async () => {
     if (!id) return;
@@ -87,6 +91,8 @@ export default function SocioDetalle() {
       bmi: parseFloat(inbodyForm.bmi) || null,
       metabolic_age: parseInt(inbodyForm.metabolic_age) || null,
       notes: inbodyForm.notes || null,
+      file_url: inbodyForm.file_url || null,
+      file_type: inbodyForm.file_type || null,
     });
     setSavingInbody(false);
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
@@ -95,10 +101,65 @@ export default function SocioDetalle() {
     setInbodyForm({
       measurement_date: new Date().toISOString().split("T")[0],
       weight_kg: "", muscle_mass_kg: "", body_fat_pct: "",
-      visceral_fat_level: "", bmi: "", metabolic_age: "", notes: ""
+      visceral_fat_level: "", bmi: "", metabolic_age: "", notes: "",
+      file_url: "", file_type: "",
     });
     await refreshInbody();
   };
+
+  const handleFileUpload = async (file: File) => {
+    if (!id) return;
+    setParsing(true);
+    try {
+      const path = `${id}/${Date.now()}-${file.name}`;
+      const { error: upErr } = await supabase.storage.from("inbody-files").upload(path, file);
+      if (upErr) throw upErr;
+      const { data: signed } = await supabase.storage.from("inbody-files").createSignedUrl(path, 3600);
+      if (!signed?.signedUrl) throw new Error("No signed URL");
+      setInbodyForm(f => ({ ...f, file_url: path, file_type: file.type }));
+
+      toast({ title: "Archivo subido, extrayendo datos con IA..." });
+      const { data, error } = await supabase.functions.invoke("parse-inbody", {
+        body: { fileUrl: signed.signedUrl, fileType: file.type },
+      });
+      if (error) throw error;
+      const p = data?.data || {};
+      setInbodyForm(f => ({
+        ...f,
+        measurement_date: p.measurement_date || f.measurement_date,
+        weight_kg: p.weight_kg != null ? String(p.weight_kg) : f.weight_kg,
+        muscle_mass_kg: p.muscle_mass_kg != null ? String(p.muscle_mass_kg) : f.muscle_mass_kg,
+        body_fat_pct: p.body_fat_pct != null ? String(p.body_fat_pct) : f.body_fat_pct,
+        visceral_fat_level: p.visceral_fat_level != null ? String(p.visceral_fat_level) : f.visceral_fat_level,
+        bmi: p.bmi != null ? String(p.bmi) : f.bmi,
+        metabolic_age: p.metabolic_age != null ? String(p.metabolic_age) : f.metabolic_age,
+      }));
+      toast({ title: "Datos extraídos ✨", description: "Revisá y ajustá si hace falta antes de guardar." });
+    } catch (e: any) {
+      toast({ title: "Error procesando archivo", description: e.message || String(e), variant: "destructive" });
+    } finally {
+      setParsing(false);
+    }
+  };
+
+  const sendInbodyEmail = async (rowId: string) => {
+    setSendingEmailId(rowId);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-inbody-email", { body: { inbodyId: rowId } });
+      if (error) throw error;
+      if (data?.sent) {
+        toast({ title: "Email enviado ✅" });
+        await refreshInbody();
+      } else {
+        toast({ title: "No se pudo enviar", description: data?.error || "Verificá la conexión a Resend", variant: "destructive" });
+      }
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message || String(e), variant: "destructive" });
+    } finally {
+      setSendingEmailId(null);
+    }
+  };
+
 
   const toggleActive = async () => {
     if (!member) return;
@@ -193,6 +254,30 @@ export default function SocioDetalle() {
         <CardContent className="space-y-4">
           {showInbodyForm && (
             <div className="space-y-3 p-3 rounded-lg border border-border/50 bg-muted/20">
+              {/* Subida de archivo InBody con parseo IA */}
+              <div className="rounded-lg border border-dashed border-cyan-500/40 bg-cyan-500/5 p-3">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="flex items-center gap-2 text-xs">
+                    <Upload className="h-4 w-4 text-cyan-400" />
+                    <span className="font-medium text-foreground">Cargar PDF o XML del InBody</span>
+                  </div>
+                  {parsing && <Loader2 className="h-4 w-4 animate-spin text-cyan-400" />}
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-1">La IA extrae los valores automáticamente. Podés revisarlos abajo antes de guardar.</p>
+                <Input
+                  type="file"
+                  accept="application/pdf,text/xml,application/xml,image/*,.xml,.pdf"
+                  disabled={parsing}
+                  className="mt-2 text-xs"
+                  onChange={e => { const f = e.target.files?.[0]; if (f) handleFileUpload(f); }}
+                />
+                {inbodyForm.file_url && (
+                  <p className="text-[10px] text-primary mt-2 flex items-center gap-1">
+                    <FileText className="h-3 w-3" /> Archivo adjunto listo para guardar
+                  </p>
+                )}
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1 col-span-2">
                   <Label className="text-xs">Fecha</Label>
@@ -235,7 +320,7 @@ export default function SocioDetalle() {
                     onChange={e => setInbodyForm(f => ({ ...f, notes: e.target.value }))} />
                 </div>
               </div>
-              <Button onClick={saveInbody} disabled={savingInbody} className="w-full">
+              <Button onClick={saveInbody} disabled={savingInbody || parsing} className="w-full">
                 {savingInbody ? "Guardando..." : "Guardar medición"}
               </Button>
             </div>
@@ -249,11 +334,34 @@ export default function SocioDetalle() {
                 Historial ({inbodyList.length})
               </p>
               {inbodyList.map((row) => (
-                <div key={row.id} className="rounded-lg border border-border/50 p-3 text-xs space-y-1">
-                  <div className="flex items-center justify-between">
+                <div key={row.id} className="rounded-lg border border-border/50 p-3 text-xs space-y-2">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
                     <span className="font-semibold text-foreground">
                       {new Date(row.measurement_date).toLocaleDateString("es-CR", { day: "2-digit", month: "short", year: "numeric" })}
                     </span>
+                    <div className="flex items-center gap-1 flex-wrap">
+                      {row.file_url && (
+                        <Badge variant="outline" className="text-[10px]">
+                          <FileText className="h-3 w-3 mr-1" />Archivo
+                        </Badge>
+                      )}
+                      {row.email_sent ? (
+                        <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px]">
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                          Email enviado {row.email_sent_at ? new Date(row.email_sent_at).toLocaleDateString() : ""}
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-[10px] text-muted-foreground">Email no enviado</Badge>
+                      )}
+                      <Button
+                        size="sm" variant="ghost" className="h-6 px-2 text-[10px]"
+                        disabled={sendingEmailId === row.id || !member?.email}
+                        title={member?.email ? "Enviar al email del consumidor" : "El consumidor no tiene email"}
+                        onClick={() => sendInbodyEmail(row.id)}
+                      >
+                        {sendingEmailId === row.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Send className="h-3 w-3 mr-1" />{row.email_sent ? "Reenviar" : "Enviar"}</>}
+                      </Button>
+                    </div>
                   </div>
                   <div className="grid grid-cols-3 gap-2 text-[11px] text-muted-foreground">
                     {row.weight_kg != null && <span>⚖️ {row.weight_kg} kg</span>}
@@ -270,6 +378,9 @@ export default function SocioDetalle() {
           )}
         </CardContent>
       </Card>
+
+      {/* Citas con coach */}
+      <AppointmentsPanel memberId={member.id} gymId={gymId} />
 
       {member.notes && member.status !== "suspended" && (
         <Card>
