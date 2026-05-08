@@ -96,6 +96,7 @@ const App = () => (
                   }
                 >
                   <Route path="/dashboard" element={<Index />} />
+                  <Route path="/recepcion" element={<RecepcionDashboard />} />
                   <Route path="/socios" element={<Socios />} />
                   <Route path="/socios/nuevo" element={<SocioNuevo />} />
                   <Route path="/socios/importar" element={<SociosImportar />} />
