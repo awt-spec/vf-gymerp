@@ -144,6 +144,13 @@ function youtubeSearchUrl(name: string) {
   return `https://www.youtube.com/results?search_query=${encodeURIComponent(name + " ejercicio tutorial forma correcta")}`;
 }
 
+function getYoutubeEmbedUrl(input: string): string {
+  const ytMatch = input.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
+  if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1`;
+  const query = encodeURIComponent(input + " ejercicio tutorial forma correcta");
+  return `https://www.youtube.com/embed?listType=search&list=${query}`;
+}
+
 function parseRestSeconds(rest: string): number {
   const n = parseInt(rest);
   if (!n) return 60;
@@ -189,6 +196,8 @@ export default function MiGym() {
   const [promotions, setPromotions] = useState<any[]>([]);
   const [interstitialAd, setInterstitialAd] = useState<any>(null);
   const [scannerOpen, setScannerOpen] = useState(false);
+
+  const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null);
 
   const [nutritionGoals, setNutritionGoals] = useState(() => {
     try {
@@ -723,10 +732,11 @@ export default function MiGym() {
                   {exercise.machine && (
                     <p className="text-sm text-muted-foreground">📍 {exercise.machine}</p>
                   )}
-                  <a href={youtubeSearchUrl(exercise.name)} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-red-400 hover:text-red-300">
-                    <Youtube className="w-3.5 h-3.5" /> ¿Cómo se hace?
-                  </a>
+                  <button
+                    onClick={() => setPreviewVideoUrl((exercise as any).video_url || exercise.name)}
+                    className="inline-flex items-center gap-1 text-sm text-red-400 hover:text-red-300 bg-red-500/10 px-3 py-1.5 rounded-full mt-1">
+                    <Youtube className="w-4 h-4" /> Ver cómo se hace
+                  </button>
                 </div>
 
                 {/* Set indicators */}
@@ -1352,6 +1362,30 @@ export default function MiGym() {
         onClose={() => setScannerOpen(false)}
         onConfirm={handleScannedFood}
       />
+
+      {previewVideoUrl && (
+        <div
+          className="fixed inset-0 z-[200] bg-black/80 flex items-center justify-center p-4"
+          onClick={() => setPreviewVideoUrl(null)}
+        >
+          <div className="relative w-full max-w-lg" onClick={e => e.stopPropagation()}>
+            <button
+              onClick={() => setPreviewVideoUrl(null)}
+              className="absolute -top-10 right-0 text-white/80 hover:text-white flex items-center gap-1 text-sm">
+              <X className="w-5 h-5" /> Cerrar
+            </button>
+            <div className="aspect-video w-full rounded-2xl overflow-hidden bg-black">
+              <iframe
+                src={getYoutubeEmbedUrl(previewVideoUrl)}
+                className="w-full h-full"
+                allowFullScreen
+                allow="autoplay; encrypted-media"
+                title="Tutorial de ejercicio"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
