@@ -34,23 +34,71 @@ export default function SocioDetalle() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [member, setMember] = useState<Member | null>(null);
+  const [gymId, setGymId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [subs, setSubs] = useState<any[]>([]);
+  const [inbodyList, setInbodyList] = useState<any[]>([]);
+  const [showInbodyForm, setShowInbodyForm] = useState(false);
+  const [savingInbody, setSavingInbody] = useState(false);
+  const [inbodyForm, setInbodyForm] = useState({
+    measurement_date: new Date().toISOString().split("T")[0],
+    weight_kg: "", muscle_mass_kg: "", body_fat_pct: "",
+    visceral_fat_level: "", bmi: "", metabolic_age: "", notes: ""
+  });
+
+  const refreshInbody = async () => {
+    if (!id) return;
+    const { data } = await supabase
+      .from("inbody_results")
+      .select("*")
+      .eq("member_id", id)
+      .order("measurement_date", { ascending: false });
+    setInbodyList(data || []);
+  };
 
   useEffect(() => {
     if (!id) return;
     (async () => {
       const { data } = await supabase.from("members").select("*").eq("id", id).maybeSingle();
       setMember(data as Member | null);
+      setGymId((data as any)?.gym_id ?? null);
       const { data: s } = await supabase
         .from("subscriptions")
         .select("id, start_date, end_date, status, plans(name, price, currency)")
         .eq("member_id", id)
         .order("start_date", { ascending: false });
       setSubs(s ?? []);
+      await refreshInbody();
       setLoading(false);
     })();
   }, [id]);
+
+  const saveInbody = async () => {
+    if (!id) return;
+    setSavingInbody(true);
+    const { error } = await supabase.from("inbody_results").insert({
+      member_id: id,
+      gym_id: gymId,
+      measurement_date: inbodyForm.measurement_date,
+      weight_kg: parseFloat(inbodyForm.weight_kg) || null,
+      muscle_mass_kg: parseFloat(inbodyForm.muscle_mass_kg) || null,
+      body_fat_pct: parseFloat(inbodyForm.body_fat_pct) || null,
+      visceral_fat_level: parseInt(inbodyForm.visceral_fat_level) || null,
+      bmi: parseFloat(inbodyForm.bmi) || null,
+      metabolic_age: parseInt(inbodyForm.metabolic_age) || null,
+      notes: inbodyForm.notes || null,
+    });
+    setSavingInbody(false);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Medición InBody guardada ✅" });
+    setShowInbodyForm(false);
+    setInbodyForm({
+      measurement_date: new Date().toISOString().split("T")[0],
+      weight_kg: "", muscle_mass_kg: "", body_fat_pct: "",
+      visceral_fat_level: "", bmi: "", metabolic_age: "", notes: ""
+    });
+    await refreshInbody();
+  };
 
   const toggleActive = async () => {
     if (!member) return;
