@@ -544,15 +544,42 @@ export default function MiGym() {
           </p>
 
           {subscription && isToday(homeDate) && (
-            <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">
-              <CardContent className="py-3">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Badge className="bg-primary/20 text-primary text-[10px]">✨ {subscription.plans?.name}</Badge>
-                  </div>
-                  <span className="text-[10px] text-muted-foreground">{subDaysLeft} días restantes</span>
+            <Card className="border-primary/30 bg-gradient-to-r from-primary/10 to-transparent">
+              <CardContent className="py-4 flex items-center gap-4">
+                <div className="text-center min-w-[64px]">
+                  <p className="text-4xl font-display font-bold text-primary">{subDaysLeft}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide">días restantes</p>
                 </div>
-                <Progress value={subProgress} className="h-1.5" />
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <Badge className="bg-primary/20 text-primary text-[10px]">✨ {subscription.plans?.name}</Badge>
+                    <span className="text-[10px] text-muted-foreground">
+                      Vence: {format(new Date(subscription.end_date), "dd MMM yyyy", { locale: es })}
+                    </span>
+                  </div>
+                  <Progress value={subProgress} className="h-2" />
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    {subDaysLeft <= 5 ? "⚠️ Renueva pronto en recepción" : `${subProgress}% del periodo utilizado`}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {isToday(homeDate) && classBookings.filter((b: any) => b.booking_date === homeDateStr).length > 0 && (
+            <Card className="border-blue-500/30 bg-blue-500/5">
+              <CardContent className="py-3">
+                <p className="text-xs font-semibold text-blue-400 flex items-center gap-1 mb-2">
+                  <CalendarDays className="w-3.5 h-3.5" /> Tienes clases agendadas hoy
+                </p>
+                {classBookings.filter((b: any) => b.booking_date === homeDateStr).map((b: any) => (
+                  <div key={b.id} className="flex items-center gap-2 text-xs py-1">
+                    <span className="font-medium text-foreground">{b.class_schedules?.classes?.name}</span>
+                    <span className="text-muted-foreground">
+                      {b.class_schedules?.start_time?.slice(0, 5)} — {b.class_schedules?.classes?.instructor}
+                    </span>
+                  </div>
+                ))}
               </CardContent>
             </Card>
           )}
