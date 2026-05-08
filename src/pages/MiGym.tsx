@@ -144,6 +144,13 @@ function youtubeSearchUrl(name: string) {
   return `https://www.youtube.com/results?search_query=${encodeURIComponent(name + " ejercicio tutorial forma correcta")}`;
 }
 
+function getYoutubeEmbedUrl(input: string): string {
+  const ytMatch = input.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
+  if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1`;
+  const query = encodeURIComponent(input + " ejercicio tutorial forma correcta");
+  return `https://www.youtube.com/embed?listType=search&list=${query}`;
+}
+
 function parseRestSeconds(rest: string): number {
   const n = parseInt(rest);
   if (!n) return 60;
