@@ -180,6 +180,97 @@ export default function SocioDetalle() {
         </Card>
       </div>
 
+      {/* Composición Corporal InBody */}
+      <Card className="border-cyan-500/30">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardTitle className="text-sm font-display flex items-center gap-2">
+            <Activity className="h-4 w-4 text-cyan-400" /> Composición Corporal (InBody)
+          </CardTitle>
+          <Button size="sm" variant={showInbodyForm ? "ghost" : "default"} onClick={() => setShowInbodyForm(v => !v)}>
+            {showInbodyForm ? <><X className="h-4 w-4 mr-1" />Cancelar</> : <><Plus className="h-4 w-4 mr-1" />Nueva medición</>}
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {showInbodyForm && (
+            <div className="space-y-3 p-3 rounded-lg border border-border/50 bg-muted/20">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1 col-span-2">
+                  <Label className="text-xs">Fecha</Label>
+                  <Input type="date" value={inbodyForm.measurement_date}
+                    onChange={e => setInbodyForm(f => ({ ...f, measurement_date: e.target.value }))} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Peso (kg)</Label>
+                  <Input type="number" step="0.1" value={inbodyForm.weight_kg}
+                    onChange={e => setInbodyForm(f => ({ ...f, weight_kg: e.target.value }))} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Masa muscular (kg)</Label>
+                  <Input type="number" step="0.1" value={inbodyForm.muscle_mass_kg}
+                    onChange={e => setInbodyForm(f => ({ ...f, muscle_mass_kg: e.target.value }))} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">% Grasa corporal</Label>
+                  <Input type="number" step="0.1" value={inbodyForm.body_fat_pct}
+                    onChange={e => setInbodyForm(f => ({ ...f, body_fat_pct: e.target.value }))} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Grasa visceral (nivel)</Label>
+                  <Input type="number" value={inbodyForm.visceral_fat_level}
+                    onChange={e => setInbodyForm(f => ({ ...f, visceral_fat_level: e.target.value }))} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">IMC</Label>
+                  <Input type="number" step="0.1" value={inbodyForm.bmi}
+                    onChange={e => setInbodyForm(f => ({ ...f, bmi: e.target.value }))} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Edad metabólica</Label>
+                  <Input type="number" value={inbodyForm.metabolic_age}
+                    onChange={e => setInbodyForm(f => ({ ...f, metabolic_age: e.target.value }))} />
+                </div>
+                <div className="space-y-1 col-span-2">
+                  <Label className="text-xs">Notas</Label>
+                  <Textarea rows={2} value={inbodyForm.notes}
+                    onChange={e => setInbodyForm(f => ({ ...f, notes: e.target.value }))} />
+                </div>
+              </div>
+              <Button onClick={saveInbody} disabled={savingInbody} className="w-full">
+                {savingInbody ? "Guardando..." : "Guardar medición"}
+              </Button>
+            </div>
+          )}
+
+          {inbodyList.length === 0 ? (
+            <p className="text-xs text-muted-foreground italic">Sin mediciones registradas</p>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Historial ({inbodyList.length})
+              </p>
+              {inbodyList.map((row) => (
+                <div key={row.id} className="rounded-lg border border-border/50 p-3 text-xs space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-foreground">
+                      {new Date(row.measurement_date).toLocaleDateString("es-CR", { day: "2-digit", month: "short", year: "numeric" })}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-[11px] text-muted-foreground">
+                    {row.weight_kg != null && <span>⚖️ {row.weight_kg} kg</span>}
+                    {row.muscle_mass_kg != null && <span>💪 {row.muscle_mass_kg} kg</span>}
+                    {row.body_fat_pct != null && <span>📊 {row.body_fat_pct}%</span>}
+                    {row.visceral_fat_level != null && <span>🫀 N{row.visceral_fat_level}</span>}
+                    {row.bmi != null && <span>📏 {row.bmi}</span>}
+                    {row.metabolic_age != null && <span>⚡ {row.metabolic_age}a</span>}
+                  </div>
+                  {row.notes && <p className="text-[11px] italic text-muted-foreground pt-1 border-t border-border/30">{row.notes}</p>}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {member.notes && member.status !== "suspended" && (
         <Card>
           <CardHeader><CardTitle className="text-sm font-display">Notas</CardTitle></CardHeader>
