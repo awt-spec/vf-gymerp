@@ -4,8 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { ArrowLeft, Mail, Phone, IdCard, Calendar, Pencil, AlertTriangle, User } from "lucide-react";
+import { ArrowLeft, Mail, Phone, IdCard, Calendar, Pencil, AlertTriangle, User, Activity, Plus, X } from "lucide-react";
 
 type Member = {
   id: string;
@@ -31,23 +34,71 @@ export default function SocioDetalle() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [member, setMember] = useState<Member | null>(null);
+  const [gymId, setGymId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [subs, setSubs] = useState<any[]>([]);
+  const [inbodyList, setInbodyList] = useState<any[]>([]);
+  const [showInbodyForm, setShowInbodyForm] = useState(false);
+  const [savingInbody, setSavingInbody] = useState(false);
+  const [inbodyForm, setInbodyForm] = useState({
+    measurement_date: new Date().toISOString().split("T")[0],
+    weight_kg: "", muscle_mass_kg: "", body_fat_pct: "",
+    visceral_fat_level: "", bmi: "", metabolic_age: "", notes: ""
+  });
+
+  const refreshInbody = async () => {
+    if (!id) return;
+    const { data } = await supabase
+      .from("inbody_results")
+      .select("*")
+      .eq("member_id", id)
+      .order("measurement_date", { ascending: false });
+    setInbodyList(data || []);
+  };
 
   useEffect(() => {
     if (!id) return;
     (async () => {
       const { data } = await supabase.from("members").select("*").eq("id", id).maybeSingle();
       setMember(data as Member | null);
+      setGymId((data as any)?.gym_id ?? null);
       const { data: s } = await supabase
         .from("subscriptions")
         .select("id, start_date, end_date, status, plans(name, price, currency)")
         .eq("member_id", id)
         .order("start_date", { ascending: false });
       setSubs(s ?? []);
+      await refreshInbody();
       setLoading(false);
     })();
   }, [id]);
+
+  const saveInbody = async () => {
+    if (!id) return;
+    setSavingInbody(true);
+    const { error } = await supabase.from("inbody_results").insert({
+      member_id: id,
+      gym_id: gymId,
+      measurement_date: inbodyForm.measurement_date,
+      weight_kg: parseFloat(inbodyForm.weight_kg) || null,
+      muscle_mass_kg: parseFloat(inbodyForm.muscle_mass_kg) || null,
+      body_fat_pct: parseFloat(inbodyForm.body_fat_pct) || null,
+      visceral_fat_level: parseInt(inbodyForm.visceral_fat_level) || null,
+      bmi: parseFloat(inbodyForm.bmi) || null,
+      metabolic_age: parseInt(inbodyForm.metabolic_age) || null,
+      notes: inbodyForm.notes || null,
+    });
+    setSavingInbody(false);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Medición InBody guardada ✅" });
+    setShowInbodyForm(false);
+    setInbodyForm({
+      measurement_date: new Date().toISOString().split("T")[0],
+      weight_kg: "", muscle_mass_kg: "", body_fat_pct: "",
+      visceral_fat_level: "", bmi: "", metabolic_age: "", notes: ""
+    });
+    await refreshInbody();
+  };
 
   const toggleActive = async () => {
     if (!member) return;
@@ -128,6 +179,97 @@ export default function SocioDetalle() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Composición Corporal InBody */}
+      <Card className="border-cyan-500/30">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardTitle className="text-sm font-display flex items-center gap-2">
+            <Activity className="h-4 w-4 text-cyan-400" /> Composición Corporal (InBody)
+          </CardTitle>
+          <Button size="sm" variant={showInbodyForm ? "ghost" : "default"} onClick={() => setShowInbodyForm(v => !v)}>
+            {showInbodyForm ? <><X className="h-4 w-4 mr-1" />Cancelar</> : <><Plus className="h-4 w-4 mr-1" />Nueva medición</>}
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {showInbodyForm && (
+            <div className="space-y-3 p-3 rounded-lg border border-border/50 bg-muted/20">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1 col-span-2">
+                  <Label className="text-xs">Fecha</Label>
+                  <Input type="date" value={inbodyForm.measurement_date}
+                    onChange={e => setInbodyForm(f => ({ ...f, measurement_date: e.target.value }))} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Peso (kg)</Label>
+                  <Input type="number" step="0.1" value={inbodyForm.weight_kg}
+                    onChange={e => setInbodyForm(f => ({ ...f, weight_kg: e.target.value }))} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Masa muscular (kg)</Label>
+                  <Input type="number" step="0.1" value={inbodyForm.muscle_mass_kg}
+                    onChange={e => setInbodyForm(f => ({ ...f, muscle_mass_kg: e.target.value }))} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">% Grasa corporal</Label>
+                  <Input type="number" step="0.1" value={inbodyForm.body_fat_pct}
+                    onChange={e => setInbodyForm(f => ({ ...f, body_fat_pct: e.target.value }))} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Grasa visceral (nivel)</Label>
+                  <Input type="number" value={inbodyForm.visceral_fat_level}
+                    onChange={e => setInbodyForm(f => ({ ...f, visceral_fat_level: e.target.value }))} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">IMC</Label>
+                  <Input type="number" step="0.1" value={inbodyForm.bmi}
+                    onChange={e => setInbodyForm(f => ({ ...f, bmi: e.target.value }))} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Edad metabólica</Label>
+                  <Input type="number" value={inbodyForm.metabolic_age}
+                    onChange={e => setInbodyForm(f => ({ ...f, metabolic_age: e.target.value }))} />
+                </div>
+                <div className="space-y-1 col-span-2">
+                  <Label className="text-xs">Notas</Label>
+                  <Textarea rows={2} value={inbodyForm.notes}
+                    onChange={e => setInbodyForm(f => ({ ...f, notes: e.target.value }))} />
+                </div>
+              </div>
+              <Button onClick={saveInbody} disabled={savingInbody} className="w-full">
+                {savingInbody ? "Guardando..." : "Guardar medición"}
+              </Button>
+            </div>
+          )}
+
+          {inbodyList.length === 0 ? (
+            <p className="text-xs text-muted-foreground italic">Sin mediciones registradas</p>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Historial ({inbodyList.length})
+              </p>
+              {inbodyList.map((row) => (
+                <div key={row.id} className="rounded-lg border border-border/50 p-3 text-xs space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-foreground">
+                      {new Date(row.measurement_date).toLocaleDateString("es-CR", { day: "2-digit", month: "short", year: "numeric" })}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-[11px] text-muted-foreground">
+                    {row.weight_kg != null && <span>⚖️ {row.weight_kg} kg</span>}
+                    {row.muscle_mass_kg != null && <span>💪 {row.muscle_mass_kg} kg</span>}
+                    {row.body_fat_pct != null && <span>📊 {row.body_fat_pct}%</span>}
+                    {row.visceral_fat_level != null && <span>🫀 N{row.visceral_fat_level}</span>}
+                    {row.bmi != null && <span>📏 {row.bmi}</span>}
+                    {row.metabolic_age != null && <span>⚡ {row.metabolic_age}a</span>}
+                  </div>
+                  {row.notes && <p className="text-[11px] italic text-muted-foreground pt-1 border-t border-border/30">{row.notes}</p>}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {member.notes && member.status !== "suspended" && (
         <Card>
