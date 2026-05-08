@@ -30,6 +30,10 @@ import Reportes from "./pages/Reportes";
 import ProgresoSocio from "./pages/ProgresoSocio";
 import Perfil from "./pages/Perfil";
 import MiGym from "./pages/MiGym";
+import MiGymEjercicios from "./pages/MiGymEjercicios";
+import MiGymNutricion from "./pages/MiGymNutricion";
+import MiGymClases from "./pages/MiGymClases";
+import MiGymPlan from "./pages/MiGymPlan";
 
 import ErpDashboard from "./pages/ErpDashboard";
 import RegisterGym from "./pages/RegisterGym";
@@ -117,6 +121,10 @@ const App = () => (
                   <Route path="/progreso" element={<ProgresoSocio />} />
                   <Route path="/perfil" element={<Perfil />} />
                   <Route path="/mi-gym" element={<MiGym />} />
+                  <Route path="/mi-gym/ejercicios" element={<MiGymEjercicios />} />
+                  <Route path="/mi-gym/nutricion" element={<MiGymNutricion />} />
+                  <Route path="/mi-gym/clases" element={<MiGymClases />} />
+                  <Route path="/mi-gym/plan" element={<MiGymPlan />} />
                   <Route path="/usuarios" element={<Usuarios />} />
                   <Route path="/usuarios/nuevo" element={<UsuarioNuevo />} />
                   <Route path="/usuarios/importar" element={<UsuariosImportar />} />
