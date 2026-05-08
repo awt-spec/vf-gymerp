@@ -78,7 +78,7 @@ export function useGymFeatures() {
 
   const isRouteEnabled = (route: string) => {
     // Dashboard, profile, progress, cobranza are always enabled
-    const alwaysEnabled = ["/dashboard", "/perfil", "/progreso", "/mi-gym", "/cobranza"];
+    const alwaysEnabled = ["/dashboard", "/perfil", "/progreso", "/mi-gym", "/cobranza", "/mi-gym/ejercicios", "/mi-gym/nutricion", "/mi-gym/clases", "/mi-gym/plan"];
     if (alwaysEnabled.includes(route)) return true;
 
     for (const [feature, routes] of Object.entries(FEATURE_TO_ROUTES)) {
