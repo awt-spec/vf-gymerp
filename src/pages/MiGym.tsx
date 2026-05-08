@@ -197,6 +197,8 @@ export default function MiGym() {
   const [interstitialAd, setInterstitialAd] = useState<any>(null);
   const [scannerOpen, setScannerOpen] = useState(false);
 
+  const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null);
+
   const [nutritionGoals, setNutritionGoals] = useState(() => {
     try {
       const saved = localStorage.getItem("gym_nutrition_goals");
