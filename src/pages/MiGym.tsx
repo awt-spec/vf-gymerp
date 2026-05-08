@@ -519,14 +519,16 @@ export default function MiGym({ tab }: { tab?: MiGymTab } = {}) {
         {memberId && <MemberQRCode memberId={memberId} memberName={memberName} />}
       </div>
 
-      <Tabs defaultValue="inicio" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 h-11">
-          <TabsTrigger value="inicio" className="text-xs gap-1 px-1"><Star className="w-3.5 h-3.5" /><span className="hidden sm:inline">Inicio</span></TabsTrigger>
-          <TabsTrigger value="ejercicios" className="text-xs gap-1 px-1"><Dumbbell className="w-3.5 h-3.5" /><span className="hidden sm:inline">Rutina</span></TabsTrigger>
-          <TabsTrigger value="nutricion" className="text-xs gap-1 px-1"><Flame className="w-3.5 h-3.5" /><span className="hidden sm:inline">Comida</span></TabsTrigger>
-          <TabsTrigger value="clases" className="text-xs gap-1 px-1"><CalendarDays className="w-3.5 h-3.5" /><span className="hidden sm:inline">Clases</span></TabsTrigger>
-          <TabsTrigger value="pagos" className="text-xs gap-1 px-1"><CreditCard className="w-3.5 h-3.5" /><span className="hidden sm:inline">Plan</span></TabsTrigger>
-        </TabsList>
+      <Tabs value={tab || "inicio"} defaultValue="inicio" className="w-full">
+        {!tab && (
+          <TabsList className="grid w-full grid-cols-5 h-11">
+            <TabsTrigger value="inicio" className="text-xs gap-1 px-1"><Star className="w-3.5 h-3.5" /><span className="hidden sm:inline">Inicio</span></TabsTrigger>
+            <TabsTrigger value="ejercicios" className="text-xs gap-1 px-1"><Dumbbell className="w-3.5 h-3.5" /><span className="hidden sm:inline">Rutina</span></TabsTrigger>
+            <TabsTrigger value="nutricion" className="text-xs gap-1 px-1"><Flame className="w-3.5 h-3.5" /><span className="hidden sm:inline">Comida</span></TabsTrigger>
+            <TabsTrigger value="clases" className="text-xs gap-1 px-1"><CalendarDays className="w-3.5 h-3.5" /><span className="hidden sm:inline">Clases</span></TabsTrigger>
+            <TabsTrigger value="pagos" className="text-xs gap-1 px-1"><CreditCard className="w-3.5 h-3.5" /><span className="hidden sm:inline">Plan</span></TabsTrigger>
+          </TabsList>
+        )}
 
         <TabsContent value="inicio" className="space-y-3 mt-3">
           {/* Promotions / Ads */}
