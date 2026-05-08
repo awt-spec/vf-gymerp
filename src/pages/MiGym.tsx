@@ -134,6 +134,17 @@ function DateStrip({ selectedDate, onChange }: { selectedDate: Date; onChange: (
 }
 
 type PlanExercise = { name: string; sets: string; reps: string; rest: string; machine?: string };
+
+const WORKOUT_CATEGORIES: Record<string, { label: string; emoji: string; description: string }> = {
+  push_pull_legs: { label: "Pesas — PPL", emoji: "🏋️", description: "Rutina de empuje, jalón y piernas" },
+  upper_lower: { label: "Pesas — Upper/Lower", emoji: "💪", description: "Tren superior e inferior" },
+  full_body: { label: "Full Body", emoji: "⚡", description: "Entrenamiento de cuerpo completo" },
+  bro_split: { label: "Pesas — Bro Split", emoji: "🔥", description: "Split clásico por grupo muscular" },
+  gap: { label: "GAP", emoji: "🧘", description: "Glúteos, Abdomen y Piernas" },
+  funcional: { label: "Funcional", emoji: "🤸", description: "Entrenamiento funcional" },
+  cardio: { label: "Cardio", emoji: "🏃", description: "Entrenamiento cardiovascular" },
+  custom: { label: "Personalizado", emoji: "🎯", description: "Rutina personalizada por tu coach" },
+};
 type SetData = { reps: string; weight: string; effort: number; done: boolean };
 type ExerciseSession = {
   exercise: PlanExercise; exIdx: number; totalSets: number;
