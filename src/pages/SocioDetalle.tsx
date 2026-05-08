@@ -91,6 +91,8 @@ export default function SocioDetalle() {
       bmi: parseFloat(inbodyForm.bmi) || null,
       metabolic_age: parseInt(inbodyForm.metabolic_age) || null,
       notes: inbodyForm.notes || null,
+      file_url: inbodyForm.file_url || null,
+      file_type: inbodyForm.file_type || null,
     });
     setSavingInbody(false);
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
@@ -99,10 +101,65 @@ export default function SocioDetalle() {
     setInbodyForm({
       measurement_date: new Date().toISOString().split("T")[0],
       weight_kg: "", muscle_mass_kg: "", body_fat_pct: "",
-      visceral_fat_level: "", bmi: "", metabolic_age: "", notes: ""
+      visceral_fat_level: "", bmi: "", metabolic_age: "", notes: "",
+      file_url: "", file_type: "",
     });
     await refreshInbody();
   };
+
+  const handleFileUpload = async (file: File) => {
+    if (!id) return;
+    setParsing(true);
+    try {
+      const path = `${id}/${Date.now()}-${file.name}`;
+      const { error: upErr } = await supabase.storage.from("inbody-files").upload(path, file);
+      if (upErr) throw upErr;
+      const { data: signed } = await supabase.storage.from("inbody-files").createSignedUrl(path, 3600);
+      if (!signed?.signedUrl) throw new Error("No signed URL");
+      setInbodyForm(f => ({ ...f, file_url: path, file_type: file.type }));
+
+      toast({ title: "Archivo subido, extrayendo datos con IA..." });
+      const { data, error } = await supabase.functions.invoke("parse-inbody", {
+        body: { fileUrl: signed.signedUrl, fileType: file.type },
+      });
+      if (error) throw error;
+      const p = data?.data || {};
+      setInbodyForm(f => ({
+        ...f,
+        measurement_date: p.measurement_date || f.measurement_date,
+        weight_kg: p.weight_kg != null ? String(p.weight_kg) : f.weight_kg,
+        muscle_mass_kg: p.muscle_mass_kg != null ? String(p.muscle_mass_kg) : f.muscle_mass_kg,
+        body_fat_pct: p.body_fat_pct != null ? String(p.body_fat_pct) : f.body_fat_pct,
+        visceral_fat_level: p.visceral_fat_level != null ? String(p.visceral_fat_level) : f.visceral_fat_level,
+        bmi: p.bmi != null ? String(p.bmi) : f.bmi,
+        metabolic_age: p.metabolic_age != null ? String(p.metabolic_age) : f.metabolic_age,
+      }));
+      toast({ title: "Datos extraídos ✨", description: "Revisá y ajustá si hace falta antes de guardar." });
+    } catch (e: any) {
+      toast({ title: "Error procesando archivo", description: e.message || String(e), variant: "destructive" });
+    } finally {
+      setParsing(false);
+    }
+  };
+
+  const sendInbodyEmail = async (rowId: string) => {
+    setSendingEmailId(rowId);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-inbody-email", { body: { inbodyId: rowId } });
+      if (error) throw error;
+      if (data?.sent) {
+        toast({ title: "Email enviado ✅" });
+        await refreshInbody();
+      } else {
+        toast({ title: "No se pudo enviar", description: data?.error || "Verificá la conexión a Resend", variant: "destructive" });
+      }
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message || String(e), variant: "destructive" });
+    } finally {
+      setSendingEmailId(null);
+    }
+  };
+
 
   const toggleActive = async () => {
     if (!member) return;
