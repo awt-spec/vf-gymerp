@@ -4,8 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { ArrowLeft, Mail, Phone, IdCard, Calendar, Pencil, AlertTriangle, User } from "lucide-react";
+import { ArrowLeft, Mail, Phone, IdCard, Calendar, Pencil, AlertTriangle, User, Activity, Plus, X } from "lucide-react";
 
 type Member = {
   id: string;
