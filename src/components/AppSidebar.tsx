@@ -50,7 +50,11 @@ const adminItems = [
 ];
 
 const memberItems = [
-  { title: "Mi Gym", url: "/mi-gym", icon: Home },
+  { title: "Inicio", url: "/mi-gym", icon: Home },
+  { title: "Entrenamiento", url: "/mi-gym/ejercicios", icon: Dumbbell },
+  { title: "Nutrición", url: "/mi-gym/nutricion", icon: Apple },
+  { title: "Clases", url: "/mi-gym/clases", icon: CalendarDays },
+  { title: "Mi Plan", url: "/mi-gym/plan", icon: CreditCard },
 ];
 
 export function AppSidebar() {
