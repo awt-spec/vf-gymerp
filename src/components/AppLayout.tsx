@@ -65,11 +65,11 @@ export function AppLayout() {
             </div>
             <ThemeToggle />
           </header>
-          <main className="flex-1 p-4 md:p-6 overflow-auto pb-20 md:pb-6">
+          <main className={`flex-1 p-4 md:p-6 overflow-auto ${!isMember ? 'pb-20' : 'pb-6'} md:pb-6`}>
             <Outlet />
           </main>
         </div>
-        <MobileBottomNav />
+        {!isMember && <MobileBottomNav />}
       </div>
     </SidebarProvider>
   );
